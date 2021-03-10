@@ -3,7 +3,7 @@ import responses
 
 import logging
 
-from telegram.ext import *
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 
 # Enable logging
