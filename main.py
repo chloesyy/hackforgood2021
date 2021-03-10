@@ -46,7 +46,7 @@ def main():
     dispatcher.add_error_handler(error)
     
     updater.start_webhook(listen="0.0.0.0",
-                          port=int(constants.PORT),
+                          port=constants.PORT,
                           url_path=constants.API_KEY)
     updater.bot.setWebhook(constants.APP_NAME + constants.API_KEY)
 
