@@ -50,8 +50,6 @@ def main():
                           url_path=constants.API_KEY)
     updater.bot.setWebhook('https://hackforgood2021.herokuapp.com/' + constants.API_KEY)
 
-    # wait time to check for next response - empty cos we dont want to wait
-    updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
