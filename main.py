@@ -45,12 +45,12 @@ def main():
 
     dispatcher.add_error_handler(error)
     
-    # updater.start_webhook(listen="0.0.0.0",
-    #                       port=int(constants.PORT),
-    #                       url_path=constants.API_KEY)
-    # updater.bot.setWebhook('https://hackforgood2021.herokuapp.com/' + constants.API_KEY)
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(constants.PORT),
+                          url_path=constants.API_KEY)
+    updater.bot.setWebhook(constants.APP_NAME + constants.API_KEY)
 
-    updater.start_polling()
+    # updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
