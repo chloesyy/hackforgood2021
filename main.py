@@ -44,6 +44,11 @@ def main():
     dispatcher.add_handler(MessageHandler(Filters.text, handle_message))
 
     dispatcher.add_error_handler(error)
+    
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(constants.PORT),
+                          url_path=constants.API_KEY)
+    updater.bot.setWebhook('https://hackforgood2021.herokuapp.com/' + constants.API_KEY)
 
     # wait time to check for next response - empty cos we dont want to wait
     updater.start_polling()
