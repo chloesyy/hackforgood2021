@@ -13,4 +13,5 @@ BULLET_POINT = '&#8226'
 
 # Messages
 START_MESSAGE = 'Hello! Welcome to the Volunteer Handbook. Here, you can ask questions or explore our libraries for information on volunteering at various organisations. \n\n Currently, this bot supports: \n' + BULLET_POINT + ' Sending questions to the adminstrators'
+CANCEL_MESSAGE = 'Goodbye! Hope you\'ve learnt more about volunteering :)'
 HELP_MESSAGE = 'Here is a list of commands that you can do: \n\n /start : Start browsing! \n /help : Use this to get help!'

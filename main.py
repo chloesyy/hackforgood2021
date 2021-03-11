@@ -6,8 +6,10 @@ import constants
 import responses
 
 from telegram import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 
+# Set states
+MENU, QUESTION = range(2)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,23 +19,39 @@ logger = logging.getLogger(__name__)
 
 logger.info('Bot started...')
 
-def start_command(update, context):
-    # Send a message when the command /start is issued.
+def start(update, context):
+    """
+    Send a message when the command /start is issued.
+    """
     user = update.message.from_user
     
     context.bot.send_message(text=constants.START_MESSAGE,
                      chat_id=user.id,
                      parse_mode=ParseMode.HTML)
+    
+    return QUESTION
 
-def help_command(update, context):
-    # Send a message when the command /help is issued.
+def help(update, context):
+    """
+    Send a message when the command /help is issued.
+    """
     user = update.message.from_user
     
     context.bot.send_message(text=constants.HELP_MESSAGE,
                      chat_id=user.id,
                      parse_mode=ParseMode.HTML)
+    
+def menu(update, context):
+    """
+    Show menu for user to press.
+    """
+    user = update.message.from_user
+    
+    context.bot.send_message(text='This should be the menu',
+                             chat_id=user.id,
+                             parse_mode=ParseMode.HTML)
 
-def handle_message(update, context):
+def ask_question(update, context):
     text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
@@ -41,6 +59,21 @@ def handle_message(update, context):
     context.bot.send_message(text=response,
                      chat_id=constants.TIME_TO_ENTREPRET,
                      parse_mode=ParseMode.HTML)
+    
+    return ConversationHandler.END
+
+def cancel(update, context):
+    """
+    User cancelation function. Cancel conversation by user.
+    """
+    user = update.message.from_user
+    logger.info("User {} canceled the conversation.".format(user.first_name))
+    
+    context.bot.send_message(text=constants.CANCEL_MESSAGE,
+                             chat_id=user.id,
+                             parse_mode=ParseMode.HTML)
+
+    return ConversationHandler.END
 
 def error(update, context):
     # Log errors caused by updates
@@ -52,10 +85,22 @@ def main():
     # Used to register handlers
     dispatcher = updater.dispatcher
     
-    dispatcher.add_handler(CommandHandler("start", start_command))
-    dispatcher.add_handler(CommandHandler("help", help_command))
+    # Add conversation handler with predefined states:
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
 
-    dispatcher.add_handler(MessageHandler(Filters.text, handle_message))
+        states={
+            MENU: [CommandHandler('menu', menu)],
+            QUESTION: [MessageHandler(Filters.text, ask_question)]
+        },
+
+        fallbacks=[CommandHandler('cancel', cancel),
+                   CommandHandler('help', help)],
+        
+        allow_reentry = True
+    )
+    
+    dispatcher.add_handler(conv_handler)
 
     dispatcher.add_error_handler(error)
     
