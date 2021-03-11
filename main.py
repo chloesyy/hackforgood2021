@@ -5,6 +5,7 @@ import logging
 import constants 
 import responses
 
+from telegram import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 
@@ -34,7 +35,7 @@ def help_command(bot, update):
                      message_id=None,
                      parse_mode=ParseMode.HTML)
 
-def handle_message(bot, update, context):
+def handle_message(bot, update):
     text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
@@ -44,12 +45,12 @@ def handle_message(bot, update, context):
 
     # update.message.reply_text(response)
 
-def error(bot, update, context):
+def error(bot, update):
     # Log errors caused by updates
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def main():
-    updater = Updater(constants.API_KEY, use_context=True)
+    updater = Updater(constants.API_KEY)
     
     # Used to register handlers
     dispatcher = updater.dispatcher
