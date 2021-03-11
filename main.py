@@ -14,15 +14,15 @@ logger = logging.getLogger(__name__)
 
 logger.info('Bot started...')
 
-def start_command(bot, update):
+def start_command(bot, update, context):
     # Send a message when the command /start is issued.
     update.message.reply_text(constants.START_MESSAGE)
 
-def help_command(bot, update):
+def help_command(bot, update, context):
     # Send a message when the command /help is issued.
     update.message.reply_text(constants.HELP_MESSAGE)
 
-def handle_message(bot, update):
+def handle_message(bot, update, context):
     text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
