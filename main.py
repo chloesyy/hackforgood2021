@@ -12,23 +12,27 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-print('Bot started...')
+logger.info('Bot started...')
 
-def start_command(update, context):
+def start_command(bot, update):
     # Send a message when the command /start is issued.
-    update.message.reply_text('Type something random!')
+    update.message.reply_text(constants.START_MESSAGE)
 
-def help_command(update, context):
+def help_command(bot, update):
     # Send a message when the command /help is issued.
-    update.message.reply_text('Just google stupid.')
+    update.message.reply_text(constants.HELP_MESSAGE)
 
-def handle_message(update, context):
+def handle_message(bot, update):
     text = str(update.message.text).lower()
-    response = responses.sample_responses(text)
+    response = responses.send_to_group(text)
+    
+    # Send whatever is sent to the bot to time to entrepret group
+    bot.send_message(text=response,
+                     chat_id=constants.TIME_TO_ENTREPRET)
 
-    update.message.reply_text(response)
+    # update.message.reply_text(response)
 
-def error(update, context):
+def error(bot, update, context):
     # Log errors caused by updates
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 

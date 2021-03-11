@@ -1,2 +1,2 @@
-def sample_responses(text):
-    return text
+def send_to_group(text):
+    return 'Someone asked this: + \n\n' + text
