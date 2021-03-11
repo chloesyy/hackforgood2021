@@ -47,7 +47,7 @@ def handle_message(bot, update):
 
 def error(bot, update):
     # Log errors caused by updates
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+    logger.warning('Update "%s" caused error "%s"', bot, update.error)
 
 def main():
     updater = Updater(constants.API_KEY)
