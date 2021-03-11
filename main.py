@@ -39,9 +39,8 @@ def handle_message(update, context):
     
     # Send whatever is sent to the bot to time to entrepret group
     context.bot.send_message(text=response,
-                     chat_id=constants.TIME_TO_ENTREPRET)
-
-    # update.message.reply_text(response)
+                     chat_id=constants.TIME_TO_ENTREPRET,
+                     parse_mode=ParseMode.HTML)
 
 def error(update, context):
     # Log errors caused by updates
@@ -64,8 +63,7 @@ def main():
                           port=constants.PORT,
                           url_path=constants.API_KEY)
     updater.bot.setWebhook(constants.APP_NAME + constants.API_KEY)
-
-    # updater.start_polling()
+    
     updater.idle()
 
 if __name__ == '__main__':
