@@ -6,10 +6,10 @@ import constants
 import responses
 
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, CallBackQueryHandler, Filters
 
 # Set states
-QUESTION = range(1)
+CHOICE, QUESTION, CATEGORIES = range(3)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,10 +45,22 @@ def help(update, context):
                      chat_id=user.id,
                      parse_mode=ParseMode.HTML)
 
+def question_intro(update, context):
+    """
+    Question intro line
+    """
+    user = update.message.from_user
+    
+    context.bot.send_message(text=constants.QUESTION_MESSAGE,
+                             chat_id=user.id,
+                             parse_mode=ParseMode.HTML)
+
 def ask_question(update, context):
     """
     Allow user to ask questions to organisations.
     """
+    user = update.message.from_user
+    
     text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
@@ -56,6 +68,23 @@ def ask_question(update, context):
     context.bot.send_message(text=response,
                      chat_id=constants.TIME_TO_ENTREPRET,
                      parse_mode=ParseMode.HTML)
+    
+    context.bot.send_message(text=constants.QUESTION_RECEIVED_MESSAGE,
+                             chat_id=user.id,
+                             parse_mode=ParseMode.HTML)
+    
+    return ConversationHandler.END
+
+def categories(update, context):
+    """
+    Allow user to choose amongst various volunteering categories.
+    """
+    user = update.message.from_user
+    
+    # todo
+    context.bot.send_message(text='This is not yet developed.',
+                             chat_id=user.id,
+                             parse_mode=ParseMode.HTML)
     
     return ConversationHandler.END
 
@@ -87,6 +116,9 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
+            CHOICE: [CallBackQueryHandler(question_intro, pattern='^questions$'),
+                     CallBackQueryHandler(categories, pattern='^categories$'),
+                     CallBackQueryHandler(cancel, pattern='^cancel$')],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
