@@ -1,7 +1,9 @@
+import os
+import html
+import logging
+
 import constants 
 import responses
-
-import logging
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -14,13 +16,23 @@ logger = logging.getLogger(__name__)
 
 logger.info('Bot started...')
 
-def start_command(bot, update, context):
+def start_command(bot, update):
     # Send a message when the command /start is issued.
-    update.message.reply_text(constants.START_MESSAGE)
+    user = update.message.from_user
+    
+    bot.send_message(text=constants.START_MESSAGE,
+                     chat_id=user.id,
+                     message_id=None,
+                     parse_mode=ParseMode.HTML)
 
-def help_command(bot, update, context):
+def help_command(bot, update):
     # Send a message when the command /help is issued.
-    update.message.reply_text(constants.HELP_MESSAGE)
+    user = update.message.from_user
+    
+    bot.send_message(text=constants.HELP_MESSAGE,
+                     chat_id=user.id,
+                     message_id=None,
+                     parse_mode=ParseMode.HTML)
 
 def handle_message(bot, update, context):
     text = str(update.message.text).lower()
