@@ -9,7 +9,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 
 # Set states
-MENU, QUESTION = range(2)
+QUESTION = range(1)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,11 +25,15 @@ def start(update, context):
     """
     user = update.message.from_user
     
+    button_list = [[InlineKeyboardButton(text='See Categories', callback_data='categories')],
+                   [InlineKeyboardButton(text='Ask Questions', callback_data='questions')],
+                   [InlineKeyboardButton(text='Cancel', callback_data='cancel')]]
+    keyboard = InlineKeyboardMarkup(button_list)
+    
     context.bot.send_message(text=constants.START_MESSAGE,
                      chat_id=user.id,
+                     reply_markup=keyboard,
                      parse_mode=ParseMode.HTML)
-    
-    return MENU
 
 def help(update, context):
     """
@@ -40,22 +44,6 @@ def help(update, context):
     context.bot.send_message(text=constants.HELP_MESSAGE,
                      chat_id=user.id,
                      parse_mode=ParseMode.HTML)
-    
-def menu(update, context):
-    """
-    Show menu for user to press.
-    """
-    button_list = [[InlineKeyboardButton(text='See Categories', callback_data='categories')],
-                   [InlineKeyboardButton(text='Ask Questions', callback_data='questions')],
-                   [InlineKeyboardButton(text='Cancel', callback_data='cancel')]]
-    keyboard = InlineKeyboardMarkup(button_list)
-    
-    user = update.message.from_user
-    
-    context.bot.send_message(text='Choose one of the following: ',
-                             chat_id=user.id,
-                             reply_markup=keyboard,
-                             parse_mode=ParseMode.HTML)
 
 def ask_question(update, context):
     """
@@ -99,7 +87,6 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            MENU: [CommandHandler('menu', menu)],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
