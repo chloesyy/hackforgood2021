@@ -17,37 +17,37 @@ logger = logging.getLogger(__name__)
 
 logger.info('Bot started...')
 
-def start_command(bot, update):
+def start_command(update, context):
     # Send a message when the command /start is issued.
     user = update.message.from_user
     
-    bot.send_message(text=constants.START_MESSAGE,
+    context.bot.send_message(text=constants.START_MESSAGE,
                      chat_id=user.id,
                      message_id=None,
                      parse_mode=ParseMode.HTML)
 
-def help_command(bot, update):
+def help_command(update, context):
     # Send a message when the command /help is issued.
     user = update.message.from_user
     
-    bot.send_message(text=constants.HELP_MESSAGE,
+    context.bot.send_message(text=constants.HELP_MESSAGE,
                      chat_id=user.id,
                      message_id=None,
                      parse_mode=ParseMode.HTML)
 
-def handle_message(bot, update):
+def handle_message(update, context):
     text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
     # Send whatever is sent to the bot to time to entrepret group
-    bot.send_message(text=response,
+    context.bot.send_message(text=response,
                      chat_id=constants.TIME_TO_ENTREPRET)
 
     # update.message.reply_text(response)
 
-def error(bot, update):
+def error(update, context):
     # Log errors caused by updates
-    logger.warning('Update "%s" caused error "%s"', bot, update.error)
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def main():
     updater = Updater(constants.API_KEY)
