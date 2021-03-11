@@ -23,7 +23,6 @@ def start_command(update, context):
     
     context.bot.send_message(text=constants.START_MESSAGE,
                      chat_id=user.id,
-                     message_id=None,
                      parse_mode=ParseMode.HTML)
 
 def help_command(update, context):
@@ -32,7 +31,6 @@ def help_command(update, context):
     
     context.bot.send_message(text=constants.HELP_MESSAGE,
                      chat_id=user.id,
-                     message_id=None,
                      parse_mode=ParseMode.HTML)
 
 def handle_message(update, context):
