@@ -6,7 +6,7 @@ import constants
 import responses
 
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, CallBackQueryHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 
 # Set states
 CHOICE, QUESTION, CATEGORIES = range(3)
@@ -34,6 +34,12 @@ def start(update, context):
                      chat_id=user.id,
                      reply_markup=keyboard,
                      parse_mode=ParseMode.HTML)
+    
+    # Use this to answer the inline keyboard
+    context.bot.answer_callback_query(update.callback_query.id, update.callback_query.data)
+    
+# def answer_callback_query(update, context):
+    
 
 def help(update, context):
     """
@@ -116,9 +122,6 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            CHOICE: [CallBackQueryHandler(question_intro, pattern='^questions$'),
-                     CallBackQueryHandler(categories, pattern='^categories$'),
-                     CallBackQueryHandler(cancel, pattern='^cancel$')],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
