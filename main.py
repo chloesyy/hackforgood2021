@@ -34,6 +34,8 @@ def start(update, context):
                      chat_id=user.id,
                      reply_markup=keyboard,
                      parse_mode=ParseMode.HTML)
+    
+    return CHOICE
 
 def help(update, context):
     """
@@ -50,10 +52,13 @@ def question_intro(update, context):
     Question intro line
     """
     query = update.callback_query
+    update.answer_callback_query(query.id, text=query.data)
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
+    
+    return QUESTION
 
 def ask_question(update, context):
     """
@@ -80,6 +85,7 @@ def categories(update, context):
     Allow user to choose amongst various volunteering categories.
     """
     query = update.callback_query
+    update.answer_callback_query(query.id, text=query.data)
     
     # todo
     context.bot.send_message(text='This is not yet developed.',
