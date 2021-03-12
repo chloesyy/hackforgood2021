@@ -109,7 +109,9 @@ def cancel(update, context):
     User cancelation function. Cancel conversation by user.
     """
     query = update.callback_query
-    user = update.message.from_user
+    context.bot.answer_callback_query(query.id, text=query.data)
+
+    user = query.from_user
     logger.info("User {} canceled the conversation.".format(user.first_name))
     
     context.bot.send_message(text=constants.CANCEL_MESSAGE,
