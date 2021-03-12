@@ -77,6 +77,9 @@ def ask_question(update, context):
     text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
+    button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    keyboard = InlineKeyboardMarkup(button_list)
+    
     # Send whatever is sent to the bot to time to entrepret group
     context.bot.send_message(text=response,
                      chat_id=constants.TIME_TO_ENTREPRET,
@@ -84,21 +87,20 @@ def ask_question(update, context):
     
     context.bot.send_message(text=constants.QUESTION_RECEIVED_MESSAGE,
                              chat_id=user.id,
+                             reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
-    
-    return ConversationHandler.END
 
 def categories(update, context):
     """
     Allow user to choose amongst various volunteering categories.
     """
-    logger.info('State: CHOICE - At categories...')
+    logger.info('State: CHOICE - Showing categories...')
 
     query = update.callback_query
     context.bot.answer_callback_query(query.id, text=query.data)
     
     # todo
-    context.bot.send_message(text='This is not yet developed.',
+    context.bot.send_message(text='This is not yet developed. The conversation has ended. Send /start to start the conversation again.',
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
     
@@ -138,7 +140,8 @@ def main():
             CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORIES) + '$'),
                      CallbackQueryHandler(question_intro, pattern='^' + str(QUESTIONS) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
-            QUESTION: [MessageHandler(Filters.text, ask_question)]
+            QUESTION: [MessageHandler(Filters.text, ask_question),
+                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')]
         },
 
         fallbacks=[CommandHandler('cancel', cancel),
