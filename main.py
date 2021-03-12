@@ -23,6 +23,7 @@ def start(update, context):
     """
     Send a message when the command /start is issued.
     """
+    logger.info('State: START')
     user = update.message.from_user
     
     button_list = [[InlineKeyboardButton(text='See Categories', callback_data='categories')],
@@ -51,6 +52,8 @@ def question_intro(update, context):
     """
     Question intro line
     """
+    logger.info('State: CHOICE - Waiting for question...')
+
     query = update.callback_query
     update.answer_callback_query(query.id, text=query.data)
     
@@ -64,6 +67,8 @@ def ask_question(update, context):
     """
     Allow user to ask questions to organisations.
     """
+    logger.info('State: QUESTION')
+    
     user = update.message.from_user
     
     text = str(update.message.text).lower()
@@ -84,6 +89,8 @@ def categories(update, context):
     """
     Allow user to choose amongst various volunteering categories.
     """
+    logger.info('State: CHOICE - At categories...')
+
     query = update.callback_query
     update.answer_callback_query(query.id, text=query.data)
     
@@ -123,9 +130,9 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            CHOICE: [CallbackQueryHandler('categories', pattern='categories'),
-                     CallbackQueryHandler('question_intro', pattern='questions'),
-                     CallbackQueryHandler('cancel', pattern='cancel')],
+            CHOICE: [CallbackQueryHandler('categories', pattern='^categories$'),
+                     CallbackQueryHandler('question_intro', pattern='^questions$'),
+                     CallbackQueryHandler('cancel', pattern='^cancel$')],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
