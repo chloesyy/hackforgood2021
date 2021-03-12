@@ -11,6 +11,9 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryH
 # Set states
 CHOICE, QUESTION, CATEGORIES = range(3)
 
+# Callback data
+CATEGORIES, QUESTIONS, CANCEL = range(3)
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -26,9 +29,9 @@ def start(update, context):
     logger.info('State: START')
     user = update.message.from_user
     
-    button_list = [[InlineKeyboardButton(text='See Categories', callback_data='categories')],
-                   [InlineKeyboardButton(text='Ask Questions', callback_data='questions')],
-                   [InlineKeyboardButton(text='Cancel', callback_data='cancel')]]
+    button_list = [[InlineKeyboardButton(text='See Categories', callback_data=str(CATEGORIES))],
+                   [InlineKeyboardButton(text='Ask Questions', callback_data=str(QUESTIONS))],
+                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
     
     context.bot.send_message(text=constants.START_MESSAGE,
@@ -68,7 +71,7 @@ def ask_question(update, context):
     Allow user to ask questions to organisations.
     """
     logger.info('State: QUESTION')
-    
+
     user = update.message.from_user
     
     text = str(update.message.text).lower()
@@ -130,9 +133,9 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            CHOICE: [CallbackQueryHandler('categories', pattern='^categories$'),
-                     CallbackQueryHandler('question_intro', pattern='^questions$'),
-                     CallbackQueryHandler('cancel', pattern='^cancel$')],
+            CHOICE: [CallbackQueryHandler('categories', pattern='^' + str(CATEGORIES) + '$'),
+                     CallbackQueryHandler('question_intro', pattern='^' + str(QUESTIONS) + '$'),
+                     CallbackQueryHandler('cancel', pattern='^' + str(CANCEL) + '$'],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
