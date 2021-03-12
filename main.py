@@ -9,10 +9,14 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-CHOICE, QUESTION, CATEGORIES = range(3)
+CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(3)
 
 # Callback data
-CATEGORIES, QUESTIONS, CANCEL = range(3)
+CATEGORIES, QUESTIONS, REPLY, CANCEL = range(3)
+
+# Temporary storage of info
+INFOSTORE = {}
+CURRENT = {}
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,6 +32,10 @@ def start(update, context):
     """
     logger.info('State: START')
     user = update.message.from_user
+    
+    # Check if chat_id is an organisation
+    if update.message.chat.id in constants.APPROVED_ORGANISATIONS:
+        return ORGANISATION
     
     button_list = [[InlineKeyboardButton(text='See Categories', callback_data=str(CATEGORIES))],
                    [InlineKeyboardButton(text='Ask Questions', callback_data=str(QUESTIONS))],
@@ -51,7 +59,7 @@ def help(update, context):
                      chat_id=user.id,
                      parse_mode=ParseMode.HTML)
 
-def question_intro(update, context):
+def ask_question_intro(update, context):
     """
     Question intro line
     """
@@ -73,22 +81,75 @@ def ask_question(update, context):
     logger.info('State: QUESTION')
 
     user = update.message.from_user
+
+    # Setup infostore for future reference
+    INFOSTORE[update.message.message_id] = {
+        "user": user.id,
+        "question": update.message.text,
+        "answer": None
+    }
     
-    text = str(update.message.text).lower()
+    text = update.message.text
     response = responses.send_to_group(text)
     
-    button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
-    keyboard = InlineKeyboardMarkup(button_list)
+    user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    user_keyboard = InlineKeyboardMarkup(user_button_list)
+
+    org_button_list = [[InlineKeyboardButton(text='Reply', callback_data=str(REPLY), inline_message_id=update.message.message_id)]]
+    org_keyboard = InlineKeyboardMarkup(org_button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
     context.bot.send_message(text=response,
                      chat_id=constants.TIME_TO_ENTREPRET,
+                     reply_markup=org_keyboard,
                      parse_mode=ParseMode.HTML)
     
     context.bot.send_message(text=constants.QUESTION_RECEIVED_MESSAGE,
                              chat_id=user.id,
-                             reply_markup=keyboard,
+                             reply_markup=user_keyboard,
                              parse_mode=ParseMode.HTML)
+
+def reply_question_intro(update, context):
+    """
+    Allow organisation to reply questions.
+    """
+    logger.info('State: QUESTION - Replying...')
+
+    query = update.callback_query
+    
+    # Setup current reply details
+    CURRENT["user"] = INFOSTORE[query.inline_message_id]["user"]
+    CURRENT["question"] = INFOSTORE[query.inline_message_id]["question"]
+
+    response = responses.reply_from_group(CURRENT["question"])
+    
+    context.bot.answer_callback_query(query.id, text=query.data)
+
+    context.bot.send_message(text=response,
+                             chat_id=constants.TIME_TO_ENTREPRET,
+                             parse_mode=ParseMode.HTML)
+    
+    return REPLY
+
+def reply_question(update, context):
+    """
+    Send to user who asked the question.
+    """
+    logger.info('State: REPLY')
+    
+    text = update.message.text
+    response = responses.reply_to_user(CURRENT["question"], text)
+    
+    # Send acknowledgement to org
+    context.bot.send_message(text=constants.REPLY_RECEIVED_MESSAGE,
+                             chat_id=constants.TIME_TO_ENTREPRET,
+                             parse_mode=ParseMode.HTML)
+    # Send reply to user
+    context.bot.send_message(text=response,
+                             chat_id=CURRENT["user"], 
+                             parse_mode=ParseMode.HTML)
+    
+    return ORGANISATION    
 
 def categories(update, context):
     """
@@ -138,10 +199,12 @@ def main():
 
         states={
             CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORIES) + '$'),
-                     CallbackQueryHandler(question_intro, pattern='^' + str(QUESTIONS) + '$'),
+                     CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
+            ORGANISATION: [CallbackQueryHandler(reply_question_intro, pattern='^' + str(REPLY) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
-                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')]
+                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
+            REPLY: [MessageHandler(Filters.text, reply_question)]
         },
 
         fallbacks=[CommandHandler('cancel', cancel),

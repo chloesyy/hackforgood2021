@@ -7,6 +7,7 @@ PORT = int(os.environ.get('PORT', 5000))
 
 # Organisation IDs
 TIME_TO_ENTREPRET = '-432918969'
+APPROVED_ORGANISATIONS = [TIME_TO_ENTREPRET]
 
 # Symbols
 BULLET_POINT = '&#8226'
@@ -17,3 +18,4 @@ CANCEL_MESSAGE = 'Goodbye! Hope you\'ve learnt more about volunteering :) \n\n S
 HELP_MESSAGE = 'Here is a list of commands that you can do: \n\n /start : Start browsing! \n /help : Use this to get help!'
 QUESTION_MESSAGE = 'Send your question below.'
 QUESTION_RECEIVED_MESSAGE = 'Question sent. The organisers will get back to you when they can! You can ask another question or end the conversation by clicking on Cancel.'
+REPLY_RECEIVED_MESSAGE = 'Reply sent to user.'
