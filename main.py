@@ -9,10 +9,10 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(3)
+CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
 
 # Callback data
-CATEGORIES, QUESTIONS, REPLY, CANCEL = range(3)
+CATEGORIES, QUESTIONS, REPLY, CANCEL = range(4)
 
 # Temporary storage of info
 INFOSTORE = {}
