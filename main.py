@@ -135,7 +135,7 @@ def main():
         states={
             CHOICE: [CallbackQueryHandler('categories', pattern='^' + str(CATEGORIES) + '$'),
                      CallbackQueryHandler('question_intro', pattern='^' + str(QUESTIONS) + '$'),
-                     CallbackQueryHandler('cancel', pattern='^' + str(CANCEL) + '$'],
+                     CallbackQueryHandler('cancel', pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
