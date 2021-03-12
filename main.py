@@ -6,7 +6,7 @@ import constants
 import responses
 
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
 CHOICE, QUESTION, CATEGORIES = range(3)
@@ -34,12 +34,6 @@ def start(update, context):
                      chat_id=user.id,
                      reply_markup=keyboard,
                      parse_mode=ParseMode.HTML)
-    
-    # Use this to answer the inline keyboard
-    context.bot.answer_callback_query(update.callback_query.id, update.callback_query.data)
-    
-# def answer_callback_query(update, context):
-    
 
 def help(update, context):
     """
@@ -55,10 +49,10 @@ def question_intro(update, context):
     """
     Question intro line
     """
-    user = update.message.from_user
+    query = update.callback_query
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
-                             chat_id=user.id,
+                             chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
 
 def ask_question(update, context):
@@ -85,11 +79,11 @@ def categories(update, context):
     """
     Allow user to choose amongst various volunteering categories.
     """
-    user = update.message.from_user
+    query = update.callback_query
     
     # todo
     context.bot.send_message(text='This is not yet developed.',
-                             chat_id=user.id,
+                             chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
     
     return ConversationHandler.END
@@ -98,11 +92,12 @@ def cancel(update, context):
     """
     User cancelation function. Cancel conversation by user.
     """
+    query = update.callback_query
     user = update.message.from_user
     logger.info("User {} canceled the conversation.".format(user.first_name))
     
     context.bot.send_message(text=constants.CANCEL_MESSAGE,
-                             chat_id=user.id,
+                             chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
 
     return ConversationHandler.END
@@ -122,6 +117,9 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
+            CHOICE: [CallbackQueryHandler('categories', pattern='categories'),
+                     CallbackQueryHandler('question_intro', pattern='questions'),
+                     CallbackQueryHandler('cancel', pattern='cancel')],
             QUESTION: [MessageHandler(Filters.text, ask_question)]
         },
 
