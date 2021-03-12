@@ -58,7 +58,7 @@ def question_intro(update, context):
     logger.info('State: CHOICE - Waiting for question...')
 
     query = update.callback_query
-    update.answer_callback_query(query.id, text=query.data)
+    context.bot.answer_callback_query(query.id, text=query.data)
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
                              chat_id=query.message.chat_id,
@@ -95,7 +95,7 @@ def categories(update, context):
     logger.info('State: CHOICE - At categories...')
 
     query = update.callback_query
-    update.answer_callback_query(query.id, text=query.data)
+    context.bot.answer_callback_query(query.id, text=query.data)
     
     # todo
     context.bot.send_message(text='This is not yet developed.',
