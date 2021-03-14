@@ -40,7 +40,7 @@ def start(update, context):
     logger.info(update.message)
     
     # Check if chat_id is an organisation
-    if update.message.chat.id in constants.APPROVED_ORGANISATIONS:
+    if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
         context.bot.send_message(text=constants.START_MESSAGE_ORG,
                                  chat_id=update.message.chat.id,
                                  parse_mode=ParseMode.HTML)
