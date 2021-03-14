@@ -100,7 +100,7 @@ def ask_question(update, context):
     user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     user_keyboard = InlineKeyboardMarkup(user_button_list)
 
-    org_button_list = [[InlineKeyboardButton(text='Reply', callback_data=str(REPLY), inline_message_id=update.message.message_id)]]
+    org_button_list = [[InlineKeyboardButton(text='Reply', callback_data=update.message.message_id)]]
     org_keyboard = InlineKeyboardMarkup(org_button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
@@ -123,7 +123,7 @@ def reply_question_intro(update, context):
     query = update.callback_query
     
     # Result is message_id, user_id, question, organisation
-    cur.execute(f"SELECT * FROM questions WHERE message_id = '{query.inline_message_id}';")
+    cur.execute(f"SELECT * FROM questions WHERE message_id = '{query.data}';")
     result = cur.fetchall()
     
     logger.info(result)
@@ -134,13 +134,13 @@ def reply_question_intro(update, context):
 
     response = responses.reply_from_group(CURRENT["question"])
     
-    context.bot.answer_callback_query(query.id, text=query.data)
+    context.bot.answer_callback_query(query.id, text="Replying question")
 
     context.bot.send_message(text=response,
                              chat_id=constants.TEST,
                              parse_mode=ParseMode.HTML)
     
-    return REPLY
+    # return REPLY
 
 def reply_question(update, context):
     """
