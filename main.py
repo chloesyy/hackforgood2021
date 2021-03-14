@@ -145,19 +145,19 @@ def reply_question(update, context):
     """
     Send to user who asked the question.
     """
-    logger.info('State: REPLY')
+    # logger.info('State: REPLY')
     
-    text = update.message.text
-    response = responses.reply_to_user(CURRENT["question"], text)
+    # text = update.message.text
+    # response = responses.reply_to_user(CURRENT["question"], text)
     
-    # Send acknowledgement to org
-    context.bot.send_message(text=constants.REPLY_RECEIVED_MESSAGE,
-                             chat_id=constants.TIME_TO_ENTREPRET,
-                             parse_mode=ParseMode.HTML)
-    # Send reply to user
-    context.bot.send_message(text=response,
-                             chat_id=CURRENT["user"], 
-                             parse_mode=ParseMode.HTML)
+    # # Send acknowledgement to org
+    # context.bot.send_message(text=constants.REPLY_RECEIVED_MESSAGE,
+    #                          chat_id=constants.TIME_TO_ENTREPRET,
+    #                          parse_mode=ParseMode.HTML)
+    # # Send reply to user
+    # context.bot.send_message(text=response,
+    #                          chat_id=CURRENT["user"], 
+    #                          parse_mode=ParseMode.HTML)
     
     return ORGANISATION    
 
