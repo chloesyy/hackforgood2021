@@ -1,6 +1,7 @@
 import os
 import html
 import logging
+import psycopg2
 
 import constants 
 import responses
@@ -14,9 +15,12 @@ CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
 # Callback data
 CATEGORIES, QUESTIONS, REPLY, CANCEL = range(4)
 
-# Temporary storage of info
-INFOSTORE = {}
+# TEMP STORE
 CURRENT = {}
+
+# Define psql connectors
+conn = None
+cur = None
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -85,10 +89,9 @@ def ask_question(update, context):
 
     user = update.message.from_user
     text = update.message.text
-
-    # Setup infostore for future reference
-    INFOSTORE[update.message.message_id]["user"] = user.id
-    INFOSTORE[update.message.message_id]["question"] = text
+    
+    # Insert question into database
+    cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({update.message.message_id}, {user.id}, {text});")
     
     response = responses.send_to_group(text)
     
@@ -117,9 +120,13 @@ def reply_question_intro(update, context):
 
     query = update.callback_query
     
+    # Result is message_id, user_id, question, organisation
+    cur.execute(f"SELECT * FROM questions WHERE message_id = '{query.inline_message_id}';")
+    result = cur.fetchall()
+    
     # Setup current reply details
-    CURRENT["user"] = INFOSTORE[query.inline_message_id]["user"]
-    CURRENT["question"] = INFOSTORE[query.inline_message_id]["question"]
+    CURRENT["user"] = result[0][1]
+    CURRENT["question"] = result[0][2]
 
     response = responses.reply_from_group(CURRENT["question"])
     
@@ -223,6 +230,24 @@ def main():
     updater.bot.setWebhook(constants.APP_NAME + constants.API_KEY)
     
     updater.idle()
+    
+def connectPSQL():
+    try:
+        DATABASE_URL = os.environ['DATABASE_URL']
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cur = conn.cursor()
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.warning(error)
+        
+def closePSQL():
+    try:
+        if conn is not None:
+            conn.close()
+            logger.info("Database connection closed.")
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.warning(error)
 
 if __name__ == '__main__':
+    connectPSQL()
     main()
+    closePSQL()
