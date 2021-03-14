@@ -37,8 +37,6 @@ def start(update, context):
     logger.info('State: START')
     user = update.message.from_user
     
-    logger.info(update.message)
-    
     # Check if chat_id is an organisation
     if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
         context.bot.send_message(text=constants.START_MESSAGE_ORG,
@@ -127,6 +125,8 @@ def reply_question_intro(update, context):
     # Result is message_id, user_id, question, organisation
     cur.execute(f"SELECT * FROM questions WHERE message_id = '{query.inline_message_id}';")
     result = cur.fetchall()
+    
+    logger.info(result)
     
     # Setup current reply details
     CURRENT["user"] = result[0][1]
