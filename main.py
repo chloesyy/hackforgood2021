@@ -91,7 +91,7 @@ def ask_question(update, context):
     text = update.message.text
     
     # Insert question into database
-    cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({update.message.message_id}, {user.id}, {text});")
+    cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({update.message.message_id}, {user.id}, '{text}');")
     cur.commit()
     logger.info('Question inserted into database.')
     
