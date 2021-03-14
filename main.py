@@ -111,6 +111,8 @@ def ask_question(update, context):
                              chat_id=user.id,
                              reply_markup=user_keyboard,
                              parse_mode=ParseMode.HTML)
+    
+    return QUESTION
 
 def reply_question_intro(update, context):
     """
