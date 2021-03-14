@@ -233,9 +233,11 @@ def main():
     
 def connectPSQL():
     try:
+        logger.info("Connecting to PSQL...")
         DATABASE_URL = os.environ['DATABASE_URL']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cur = conn.cursor()
+        logger.info("Connected to PSQL.")
     except (Exception, psycopg2.DatabaseError) as error:
         logger.warning(error)
         
