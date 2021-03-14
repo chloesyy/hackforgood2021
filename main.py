@@ -92,6 +92,7 @@ def ask_question(update, context):
     
     # Insert question into database
     cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({update.message.message_id}, {user.id}, {text});")
+    cur.commit()
     
     response = responses.send_to_group(text)
     
