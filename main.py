@@ -84,15 +84,12 @@ def ask_question(update, context):
     logger.info('State: QUESTION')
 
     user = update.message.from_user
+    text = update.message.text
 
     # Setup infostore for future reference
-    INFOSTORE[update.message.message_id] = {
-        "user": user.id,
-        "question": update.message.text,
-        "answer": None
-    }
+    INFOSTORE[update.message.message_id]["user"] = user.id
+    INFOSTORE[update.message.message_id]["question"] = text
     
-    text = update.message.text
     response = responses.send_to_group(text)
     
     user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
