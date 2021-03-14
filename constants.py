@@ -6,8 +6,9 @@ APP_NAME = 'https://hackforgood2021.herokuapp.com/'
 PORT = int(os.environ.get('PORT', 5000))
 
 # Organisation IDs
+TEST = '-560294536'
 TIME_TO_ENTREPRET = '-432918969'
-APPROVED_ORGANISATIONS = [TIME_TO_ENTREPRET]
+APPROVED_ORGANISATIONS = [TIME_TO_ENTREPRET, TEST]
 
 # Symbols
 BULLET_POINT = '&#8226'

@@ -105,7 +105,7 @@ def ask_question(update, context):
     
     # Send whatever is sent to the bot to time to entrepret group
     context.bot.send_message(text=response,
-                     chat_id=constants.TIME_TO_ENTREPRET,
+                     chat_id=constants.TEST,
                      reply_markup=org_keyboard,
                      parse_mode=ParseMode.HTML)
     
@@ -137,7 +137,7 @@ def reply_question_intro(update, context):
     context.bot.answer_callback_query(query.id, text=query.data)
 
     context.bot.send_message(text=response,
-                             chat_id=constants.TIME_TO_ENTREPRET,
+                             chat_id=constants.TEST,
                              parse_mode=ParseMode.HTML)
     
     return REPLY
@@ -153,7 +153,7 @@ def reply_question(update, context):
     
     # Send acknowledgement to org
     context.bot.send_message(text=constants.REPLY_RECEIVED_MESSAGE,
-                             chat_id=constants.TIME_TO_ENTREPRET,
+                             chat_id=constants.TEST,
                              parse_mode=ParseMode.HTML)
     # Send reply to user
     context.bot.send_message(text=response,
