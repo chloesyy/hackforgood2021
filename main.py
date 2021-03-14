@@ -113,8 +113,6 @@ def ask_question(update, context):
                              chat_id=user.id,
                              reply_markup=user_keyboard,
                              parse_mode=ParseMode.HTML)
-    
-    return QUESTION
 
 def reply_question_intro(update, context):
     """
@@ -212,9 +210,9 @@ def main():
             CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORIES) + '$'),
                      CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
-            # ORGANISATION: [CallbackQueryHandler(reply_question_intro, pattern='^' + str(REPLY) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
+            ORGANISATION: [CallbackQueryHandler(reply_question_intro, pattern='^' + str(REPLY) + '$')],
             # REPLY: [MessageHandler(Filters.text, reply_question)]
         },
 
