@@ -37,6 +37,8 @@ def start(update, context):
     logger.info('State: START')
     user = update.message.from_user
     
+    logger.info(update.message)
+    
     # Check if chat_id is an organisation
     if update.message.chat.id in constants.APPROVED_ORGANISATIONS:
         context.bot.send_message(text=constants.START_MESSAGE_ORG,
