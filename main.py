@@ -162,7 +162,9 @@ def reply_question_2(update, context):
     logger.info(update.message.reply_to_message.from_user.is_bot)
 
     if len(result) == 0 and update.message.reply_to_message.from_user.is_bot is True:
+        reply_to_message_id = update.message.message_id
         context.bot.send_message(text=constants.INVALID_REPLY,
+                                 reply_to_message_id=message_id,
                                  chat_id=constants.TEST,
                                  parse_mode=ParseMode.HTML)
 
