@@ -159,6 +159,7 @@ def reply_question_2(update, context):
     result = cur.fetchall()
 
     logger.info(result)
+    logger.info(update.message.reply_to_message.from_user.is_bot)
 
     if result is None and update.message.reply_to_message.from_user.is_bot is True:
         context.bot.send_message(text=constants.INVALID_REPLY,
