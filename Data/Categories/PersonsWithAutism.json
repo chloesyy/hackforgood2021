@@ -1,0 +1,21 @@
+{
+    "Community": "Persons with Autism",
+
+    "About_Community": "Autism, or autism spectrum disorder (ASD), refers to a broad range of conditions characterized by challenges with social skills, repetitive behaviors, speech and nonverbal communication. The effects of  ASD and the severity of symptoms are different in each person.",
+    
+    "Dos_n_Donts": [
+        [
+            "Have patience. Give short mental breaks and repeat your words if they lose focus.",
+            "Give routines. Persons with autism enjoy having familiar routine tasks and are uncomfortable with unfamiliar tasks."
+        ],
+        [
+            "Force eye contact. Persons with autism have difficulty maintaining eye contact during interactions.",
+            "Panic. They might express their frustration in crowded and unfamiliar environments when they feel uncomfortable. Offering a quiet, peaceful space might help them calm down."
+        ]
+    ],
+
+    "Organisations": [
+        "Autism Resource Centre",
+        "St. Andrew's Autism Centre"
+    ]
+}

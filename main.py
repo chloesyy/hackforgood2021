@@ -1,10 +1,13 @@
 import os
 import html
+import json
 import logging
 import psycopg2
 
 import constants 
 import responses
+import Data
+import Data.Categories as Categories
 
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
@@ -16,6 +19,7 @@ CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
 CATEGORY, QUESTIONS, REPLY, CANCEL = range(4)
 
 # TEMP STORE
+DATA = {}
 CURRENT = {}
 
 # Define psql connectors
@@ -92,8 +96,8 @@ def ask_question(update, context):
     
     response = responses.send_to_group(text)
     
-    user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
-    user_keyboard = InlineKeyboardMarkup(user_button_list)
+    button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    keyboard = InlineKeyboardMarkup(button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
     sentMessage = context.bot.send_message(text=response,
@@ -110,7 +114,7 @@ def ask_question(update, context):
     # Send acknowledgement to user
     context.bot.send_message(text=constants.QUESTION_RECEIVED_MESSAGE,
                              chat_id=user.id,
-                             reply_markup=user_keyboard,
+                             reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
 
 def reply_question(update, context):
@@ -158,12 +162,32 @@ def categories(update, context):
     query = update.callback_query
     context.bot.answer_callback_query(query.id, text=query.data)
     
-    # todo
-    context.bot.send_message(text='This is not yet developed. The conversation has ended. Send /start to start the conversation again.',
+    button_list = []
+
+    for category in DATA["list_categories"]:
+        button_list.append([InlineKeyboardButton(text=category, callback_data=category)])
+    
+    button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
+    keyboard = InlineKeyboardMarkup(button_list)
+    
+    context.bot.send_message(text=constants.CATEGORIES_MESSAGE,
                              chat_id=query.message.chat_id,
+                             reply_markup = keyboard,
                              parse_mode=ParseMode.HTML)
     
-    return ConversationHandler.END
+    return CATEGORIES
+
+def show_category(update, context):
+    """
+    Show the chosen category
+    """
+    query = update.callback_query
+
+    logger.info("User clicked on category {}".format(query.data))
+
+    context.bot.send_message(text=query.data,
+                             chat_id=query.message.chat_id,
+                             parse_mode=ParseMode.HTML)
 
 def cancel(update, context):
     """
@@ -191,6 +215,11 @@ def main():
     # Used to register handlers
     dispatcher = updater.dispatcher
     
+    categories_handler = []
+    for category in DATA["list_categories"]:
+        categories_handler.append(CallbackQueryHandler(show_category, pattern='^' + category + '$'))
+    categories_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+    
     # Add conversation handler with predefined states:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
@@ -201,6 +230,7 @@ def main():
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
+            CATEGORIES: categories_handler,
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
@@ -221,7 +251,22 @@ def main():
     
     updater.idle()
     
-def connectPSQL():
+def load_files():
+    logger.info('Loading json files from Data...')
+    categories = os.listdir(constants.CATEGORIES_FOLDER)
+    categories.sort()
+    
+    DATA["list_categories"] = []
+    
+    for category in categories:
+        file_name = category.split('.')[0]
+        file = open(os.path.join(constants.CATEGORIES_FOLDER, category))
+        DATA["categories"][file_name] = json.load(file)
+        DATA["list_categories"].append(DATA["categories"][file_name]["Community"])
+
+    logger.info(DATA["list_categories"])
+            
+def connect_PSQL():
     try:
         logger.info("Connecting to PSQL...")
         DATABASE_URL = os.environ['DATABASE_URL']
@@ -233,7 +278,7 @@ def connectPSQL():
     except (Exception, psycopg2.DatabaseError) as error:
         logger.warning(error)
         
-def closePSQL():
+def close_PSQL():
     try:
         if conn is not None:
             conn.close()
@@ -242,6 +287,7 @@ def closePSQL():
         logger.warning(error)
 
 if __name__ == '__main__':
-    connectPSQL()
+    load_files()
+    connect_PSQL()
     main()
-    closePSQL()
+    close_PSQL()

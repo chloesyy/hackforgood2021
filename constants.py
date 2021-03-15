@@ -5,6 +5,10 @@ API_KEY = '1685534914:AAHnkhAmCBwvsP7oiYKcA6gnTpsHsdWC9DA'
 APP_NAME = 'https://hackforgood2021.herokuapp.com/'
 PORT = int(os.environ.get('PORT', 5000))
 
+# Folder
+DATA_FOLDER = './Data'
+CATEGORIES_FOLDER = './Data/Categories'
+
 # Organisation IDs
 TEST = '-560294536'
 TIME_TO_ENTREPRET = '-432918969'
@@ -12,6 +16,9 @@ APPROVED_ORGANISATIONS = [TIME_TO_ENTREPRET, TEST]
 
 # Symbols
 BULLET_POINT = '&#8226'
+
+# Categories and Organisations
+CATEGORIES = ['Persons with Autism', 'Hearing Impaired', 'Visually Impaired']
 
 # Messages
 START_MESSAGE = 'Hello! Welcome to the Volunteer Handbook. Here, you can ask questions or explore our libraries for information on volunteering at various organisations. \n\n Currently, this bot supports: \n' + BULLET_POINT + ' Sending questions to the adminstrators'
@@ -22,3 +29,4 @@ QUESTION_MESSAGE = 'Send your question below.'
 QUESTION_RECEIVED_MESSAGE = 'Question sent. The organisers will get back to you when they can! You can ask another question or end the conversation by clicking on Cancel.'
 REPLY_RECEIVED_MESSAGE = 'Reply sent to user.'
 INVALID_REPLY = 'This is an invalid message to reply to!'
+CATEGORIES_MESSAGE = 'Please click on the category that you would like to learn about below.'
