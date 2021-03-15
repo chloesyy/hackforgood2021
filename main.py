@@ -13,7 +13,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryH
 CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
 
 # Callback data
-CATEGORIES, QUESTIONS, REPLY, CANCEL = range(4)
+CATEGORY, QUESTIONS, REPLY, CANCEL = range(4)
 
 # TEMP STORE
 CURRENT = {}
@@ -44,7 +44,7 @@ def start(update, context):
                                  parse_mode=ParseMode.HTML)
         return ORGANISATION
     
-    button_list = [[InlineKeyboardButton(text='See Categories', callback_data=str(CATEGORIES))],
+    button_list = [[InlineKeyboardButton(text='See Categories', callback_data=str(CATEGORY))],
                    [InlineKeyboardButton(text='Ask Questions', callback_data=str(QUESTIONS))],
                    [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
@@ -90,11 +90,6 @@ def ask_question(update, context):
     user = update.message.from_user
     text = update.message.text
     
-    # Insert question into database
-    cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({update.message.message_id}, {user.id}, '{text}');")
-    conn.commit()
-    logger.info('Question inserted into database.')
-    
     response = responses.send_to_group(text)
     
     user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
@@ -104,11 +99,19 @@ def ask_question(update, context):
     org_keyboard = InlineKeyboardMarkup(org_button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
-    context.bot.send_message(text=response,
+    sentMessage = context.bot.send_message(text=response,
                      chat_id=constants.TEST,
                      reply_markup=org_keyboard,
                      parse_mode=ParseMode.HTML)
     
+    message_id = sentMessage.message_id
+
+    # Insert question into database
+    cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({message_id}, {user.id}, '{text}');")
+    conn.commit()
+    logger.info('Question inserted into database.')
+
+    # Send acknowledgement to user
     context.bot.send_message(text=constants.QUESTION_RECEIVED_MESSAGE,
                              chat_id=user.id,
                              reply_markup=user_keyboard,
@@ -141,6 +144,42 @@ def reply_question_intro(update, context):
                              parse_mode=ParseMode.HTML)
     
     # return REPLY
+
+def reply_question_2(update, context):
+    """
+    Allow organisations to reply questions.
+    """
+    logger.info('State: ORGANISATION - Replying... 2')
+
+    text = update.message.text
+    message_id = update.message.reply_to_message.message_id
+
+     # Result is message_id, user_id, question, organisation
+    cur.execute(f"SELECT * FROM questions WHERE message_id = '{message_id}';")
+    result = cur.fetchall()
+
+    logger.info(result)
+
+    if result is None and update.message.reply_to_message.from_user.is_bot is True:
+        context.bot.send_message(text=constants.INVALID_REPLY,
+                                 chat_id=constants.TEST,
+                                 parse_mode=ParseMode.HTML)
+
+    # Setup current reply details
+    CURRENT["user"] = result[0][1]
+    CURRENT["question"] = result[0][2]
+    
+    acknowledgement = responses.reply_answer(CURRENT["question"], text)
+    touser = responses.reply_to_user(CURRENT["question"], text)
+    
+    context.bot.send_message(text=acknowledgement,
+                             chat_id=constants.TEST, 
+                             parse_mode=ParseMode.HTML)
+
+    context.bot.send_message(text=touser,
+                             chat_id=CURRENT["user"],
+                             parse_mode=ParseMode.HTML)
+
 
 def reply_question(update, context):
     """
@@ -209,12 +248,13 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORIES) + '$'),
+            CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORY) + '$'),
                      CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
-            ORGANISATION: [CallbackQueryHandler(reply_question_intro, pattern='^' + str(REPLY) + '$')],
+            ORGANISATION: [CallbackQueryHandler(reply_question_intro, pattern='^' + str(REPLY) + '$'),
+                           MessageHandler(Filters.text, reply_question_2)],
             # REPLY: [MessageHandler(Filters.text, reply_question)]
         },
 

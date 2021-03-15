@@ -21,3 +21,4 @@ HELP_MESSAGE = 'Here is a list of commands that you can do: \n\n /start : Start 
 QUESTION_MESSAGE = 'Send your question below.'
 QUESTION_RECEIVED_MESSAGE = 'Question sent. The organisers will get back to you when they can! You can ask another question or end the conversation by clicking on Cancel.'
 REPLY_RECEIVED_MESSAGE = 'Reply sent to user.'
+INVALID_REPLY = 'This is an invalid message to reply to!'
