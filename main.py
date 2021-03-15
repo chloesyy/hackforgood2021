@@ -1,6 +1,7 @@
 import os
 import html
 import logging
+import psycopg2
 
 import constants 
 import responses
@@ -9,10 +10,17 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-CHOICE, QUESTION, CATEGORIES = range(3)
+CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
 
 # Callback data
-CATEGORIES, QUESTIONS, CANCEL = range(3)
+CATEGORY, QUESTIONS, REPLY, CANCEL = range(4)
+
+# TEMP STORE
+CURRENT = {}
+
+# Define psql connectors
+conn = None
+cur = None
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -29,7 +37,14 @@ def start(update, context):
     logger.info('State: START')
     user = update.message.from_user
     
-    button_list = [[InlineKeyboardButton(text='See Categories', callback_data=str(CATEGORIES))],
+    # Check if chat_id is an organisation
+    if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
+        context.bot.send_message(text=constants.START_MESSAGE_ORG,
+                                 chat_id=update.message.chat.id,
+                                 parse_mode=ParseMode.HTML)
+        return ORGANISATION
+    
+    button_list = [[InlineKeyboardButton(text='See Categories', callback_data=str(CATEGORY))],
                    [InlineKeyboardButton(text='Ask Questions', callback_data=str(QUESTIONS))],
                    [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
@@ -51,7 +66,7 @@ def help(update, context):
                      chat_id=user.id,
                      parse_mode=ParseMode.HTML)
 
-def question_intro(update, context):
+def ask_question_intro(update, context):
     """
     Question intro line
     """
@@ -73,22 +88,66 @@ def ask_question(update, context):
     logger.info('State: QUESTION')
 
     user = update.message.from_user
+    text = update.message.text
     
-    text = str(update.message.text).lower()
     response = responses.send_to_group(text)
     
-    button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
-    keyboard = InlineKeyboardMarkup(button_list)
+    user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    user_keyboard = InlineKeyboardMarkup(user_button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
-    context.bot.send_message(text=response,
-                     chat_id=constants.TIME_TO_ENTREPRET,
+    sentMessage = context.bot.send_message(text=response,
+                     chat_id=constants.TEST,
                      parse_mode=ParseMode.HTML)
     
+    message_id = sentMessage.message_id
+
+    # Insert question into database
+    cur.execute(f"INSERT INTO questions(message_id, user_id, question) VALUES ({message_id}, {user.id}, '{text}');")
+    conn.commit()
+    logger.info('Question inserted into database.')
+
+    # Send acknowledgement to user
     context.bot.send_message(text=constants.QUESTION_RECEIVED_MESSAGE,
                              chat_id=user.id,
-                             reply_markup=keyboard,
+                             reply_markup=user_keyboard,
                              parse_mode=ParseMode.HTML)
+
+def reply_question(update, context):
+    """
+    Allow organisations to reply questions.
+    """
+    logger.info('State: ORGANISATION - Replying...')
+
+    text = update.message.text
+    message_id = update.message.reply_to_message.message_id
+
+     # Result is message_id, user_id, question, organisation
+    cur.execute(f"SELECT * FROM questions WHERE message_id = '{message_id}';")
+    result = cur.fetchall()
+
+    if len(result) == 0 and update.message.reply_to_message.from_user.is_bot is True:
+        reply_to_message_id = update.message.message_id
+        context.bot.send_message(text=constants.INVALID_REPLY,
+                                 reply_to_message_id=reply_to_message_id,
+                                 chat_id=constants.TEST,
+                                 parse_mode=ParseMode.HTML)
+        return
+
+    # Setup current reply details
+    CURRENT["user"] = result[0][1]
+    CURRENT["question"] = result[0][2]
+    
+    acknowledgement = responses.reply_answer(CURRENT["question"], text)
+    touser = responses.reply_to_user(CURRENT["question"], text)
+    
+    context.bot.send_message(text=acknowledgement,
+                             chat_id=constants.TEST, 
+                             parse_mode=ParseMode.HTML)
+
+    context.bot.send_message(text=touser,
+                             chat_id=CURRENT["user"],
+                             parse_mode=ParseMode.HTML)  
 
 def categories(update, context):
     """
@@ -137,11 +196,12 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORIES) + '$'),
-                     CallbackQueryHandler(question_intro, pattern='^' + str(QUESTIONS) + '$'),
+            CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORY) + '$'),
+                     CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
-                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')]
+                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
+            ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
         fallbacks=[CommandHandler('cancel', cancel),
@@ -160,6 +220,28 @@ def main():
     updater.bot.setWebhook(constants.APP_NAME + constants.API_KEY)
     
     updater.idle()
+    
+def connectPSQL():
+    try:
+        logger.info("Connecting to PSQL...")
+        DATABASE_URL = os.environ['DATABASE_URL']
+        global conn
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        global cur
+        cur = conn.cursor()
+        logger.info("Connected to PSQL.")
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.warning(error)
+        
+def closePSQL():
+    try:
+        if conn is not None:
+            conn.close()
+            logger.info("Database connection closed.")
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.warning(error)
 
 if __name__ == '__main__':
+    connectPSQL()
     main()
+    closePSQL()
