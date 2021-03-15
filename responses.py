@@ -1,11 +1,8 @@
 def send_to_group(text):
     return '<b>Someone asked this:</b> \n\n' + text
 
-def reply_from_group(text):
-    return '<b>You are replying to:</b> \n\n' + text + '\n\n Please send your reply below.'
-
 def reply_answer(question, reply):
-    return '<b>You replied:</b> \n' + reply + '\n\n<b>To question:</b> \n' + question
+    return '<b>Your reply to the question has been sent.</b> \nSee below for more information. \n\n <b>Question:</b> \n' + question + '\n\n<b>Your reply:</b> \n' + reply
 
 def reply_to_user(question, reply):
-    return '<b>In reply to question:</b> \n' + question + '\n\n<b>Reply:</b> \n' + reply
+    return '<b>GOOD NEWS! The organisation has replied to one of your questions.</b> \n\n<b>Your question:</b> \n' + question + '\n\n<b>Answer:</b> \n' + reply

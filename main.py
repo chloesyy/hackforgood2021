@@ -117,7 +117,7 @@ def reply_question(update, context):
     """
     Allow organisations to reply questions.
     """
-    logger.info('State: ORGANISATION - Replying... 2')
+    logger.info('State: ORGANISATION - Replying...')
 
     text = update.message.text
     message_id = update.message.reply_to_message.message_id
@@ -132,6 +132,7 @@ def reply_question(update, context):
                                  reply_to_message_id=reply_to_message_id,
                                  chat_id=constants.TEST,
                                  parse_mode=ParseMode.HTML)
+        return
 
     # Setup current reply details
     CURRENT["user"] = result[0][1]
