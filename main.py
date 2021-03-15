@@ -16,7 +16,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryH
 CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
 
 # Callback data
-CATEGORY, QUESTIONS, REPLY, CANCEL = range(4)
+CATEGORY, QUESTIONS, REPLY, CANCEL, BACK = range(5)
 
 # TEMP STORE
 DATA = {}
@@ -184,10 +184,35 @@ def show_category(update, context):
     query = update.callback_query
 
     logger.info("User clicked on category {}".format(query.data))
+    
+    CURRENT["category"] = query.data
+    
+    button_list = []
+    for detail in constants.CATEGORY_DETAILS:
+        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
+    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    
+    keyboard = InlineKeyboardMarkup(button_list)
 
     context.bot.send_message(text=query.data,
                              chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
+
+def category_detail(update, context):
+    """
+    Show the information requested by user
+    """
+    query = update.callback_query
+    
+    context.bot.send_message(text=query.data,
+                             chat_id=query.message.chat_id,
+                             parse_mode=ParseMode.HTML)
+    
+def back(update, context):
+    #todo
+    return
 
 def cancel(update, context):
     """
@@ -218,6 +243,9 @@ def main():
     categories_handler = []
     for category in DATA["list_categories"]:
         categories_handler.append(CallbackQueryHandler(show_category, pattern='^' + category + '$'))
+    for detail in constants.CATEGORY_DETAILS:
+        categories_handler.append(CallbackQueryHandler(category_detail, pattern='^' + detail + '$'))
+    categories_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     categories_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
     
     # Add conversation handler with predefined states:
@@ -264,8 +292,18 @@ def load_files():
         file = open(os.path.join(constants.CATEGORIES_FOLDER, category))
         DATA["categories"][file_name] = json.load(file)
         DATA["list_categories"].append(DATA["categories"][file_name]["Community"])
-
-    logger.info(DATA["list_categories"])
+        
+    organisations = os.listdir(constants.ORGANISATIONS_FOLDER)
+    organisations.sort()
+    
+    DATA["list_organisations"] = []
+    DATA["organisations"] = {}
+    
+    for organisation in organisations:
+        file_name = organisation.split('.')[0]
+        file = open(os.path.join(constants.ORGANISATIONS_FOLDER, organisation))
+        DATA["organisations"][file_name] = json.load(file)
+        DATA["list_organisations"].append(DATA["organisations"][file_name]["Organisation"])
             
 def connect_PSQL():
     try:
