@@ -94,14 +94,10 @@ def ask_question(update, context):
     
     user_button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     user_keyboard = InlineKeyboardMarkup(user_button_list)
-
-    org_button_list = [[InlineKeyboardButton(text='Reply', callback_data=update.message.message_id)]]
-    org_keyboard = InlineKeyboardMarkup(org_button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
     sentMessage = context.bot.send_message(text=response,
                      chat_id=constants.TEST,
-                     reply_markup=org_keyboard,
                      parse_mode=ParseMode.HTML)
     
     message_id = sentMessage.message_id
@@ -117,35 +113,7 @@ def ask_question(update, context):
                              reply_markup=user_keyboard,
                              parse_mode=ParseMode.HTML)
 
-def reply_question_intro(update, context):
-    """
-    Allow organisation to reply questions.
-    """
-    logger.info('State: ORGANISATION - Replying...')
-
-    query = update.callback_query
-    
-    # Result is message_id, user_id, question, organisation
-    cur.execute(f"SELECT * FROM questions WHERE message_id = '{query.data}';")
-    result = cur.fetchall()
-    
-    logger.info(result)
-    
-    # Setup current reply details
-    CURRENT["user"] = result[0][1]
-    CURRENT["question"] = result[0][2]
-
-    response = responses.reply_from_group(CURRENT["question"])
-    
-    context.bot.answer_callback_query(query.id, text="Replying question")
-
-    context.bot.send_message(text=response,
-                             chat_id=constants.TEST,
-                             parse_mode=ParseMode.HTML)
-    
-    # return REPLY
-
-def reply_question_2(update, context):
+def reply_question(update, context):
     """
     Allow organisations to reply questions.
     """
@@ -157,9 +125,6 @@ def reply_question_2(update, context):
      # Result is message_id, user_id, question, organisation
     cur.execute(f"SELECT * FROM questions WHERE message_id = '{message_id}';")
     result = cur.fetchall()
-
-    logger.info(result)
-    logger.info(update.message.reply_to_message.from_user.is_bot)
 
     if len(result) == 0 and update.message.reply_to_message.from_user.is_bot is True:
         reply_to_message_id = update.message.message_id
@@ -181,28 +146,7 @@ def reply_question_2(update, context):
 
     context.bot.send_message(text=touser,
                              chat_id=CURRENT["user"],
-                             parse_mode=ParseMode.HTML)
-
-
-def reply_question(update, context):
-    """
-    Send to user who asked the question.
-    """
-    logger.info('State: REPLY')
-    
-    text = update.message.text
-    response = responses.reply_to_user(CURRENT["question"], text)
-    
-    # Send acknowledgement to org
-    context.bot.send_message(text=constants.REPLY_RECEIVED_MESSAGE,
-                             chat_id=constants.TEST,
-                             parse_mode=ParseMode.HTML)
-    # Send reply to user
-    context.bot.send_message(text=response,
-                             chat_id=CURRENT["user"], 
-                             parse_mode=ParseMode.HTML)
-    
-    return ORGANISATION    
+                             parse_mode=ParseMode.HTML)  
 
 def categories(update, context):
     """
@@ -256,9 +200,7 @@ def main():
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
-            ORGANISATION: [CallbackQueryHandler(reply_question_intro, pattern='^' + str(REPLY) + '$'),
-                           MessageHandler(Filters.text, reply_question_2)],
-            # REPLY: [MessageHandler(Filters.text, reply_question)]
+            ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
         fallbacks=[CommandHandler('cancel', cancel),
