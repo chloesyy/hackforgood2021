@@ -257,6 +257,7 @@ def load_files():
     categories.sort()
     
     DATA["list_categories"] = []
+    DATA["categories"] = {}
     
     for category in categories:
         file_name = category.split('.')[0]
