@@ -198,13 +198,12 @@ def show_category(update, context):
     """
     Show the chosen category
     """
+    query = update.callback_query
+    CURRENT["state"] = CATEGORIES
     
     if CURRENT["state"] != DETAILS:
-        query = update.callback_query
         logger.info("User clicked on category {}".format(query.data))
         CURRENT["category"] = query.data
-    
-    CURRENT["state"] = CATEGORIES
 
     button_list = []
     for detail in constants.CATEGORY_DETAILS:
