@@ -181,8 +181,8 @@ def categories(update, context):
     
     button_list = []
 
-    for category in DATA["list_categories"]:
-        button_list.append([InlineKeyboardButton(text=category, callback_data=category)])
+    for category in DATA["list_categories"]: #these are all the categories(Disability) 
+        button_list.append([InlineKeyboardButton(text=category, callback_data=category)]) #Creating the buttons to show each category
     button_list.append([InlineKeyboardButton(text='Back', callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
@@ -199,15 +199,15 @@ def show_category(update, context):
     Show the chosen category
     """
     query = update.callback_query
-    CURRENT["state"] = CATEGORIES
+    CURRENT["state"] = CATEGORIES #Run this function with the current state = CATEGORIES
     
     if CURRENT["state"] != DETAILS:
         logger.info("User clicked on category {}".format(query.data))
         CURRENT["category"] = query.data
 
     button_list = []
-    for detail in constants.CATEGORY_DETAILS:
-        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
+    for detail in constants.CATEGORY_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
+        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
     button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
@@ -234,8 +234,20 @@ def category_detail(update, context):
     #todo
 
     query = update.callback_query
-    
-    context.bot.send_message(text=CURRENT["category"],
+    logger.info("User clicked on{}".format(query.data))
+    do = []
+    dont = []
+    for key in DATA["categories"]:
+        if DATA["categories"][key]["Community"]==query.data:
+            do=DATA["categories"][key]["Dos_n_Donts"][0]
+            dont=DATA["categories"][key]["Dos_n_Donts"][1]
+    DO=""
+    DONT=""
+    for dos in do:
+        DO = DO + constants.BULLET_POINT + dos + "\n"
+    for donts in dont:
+        DONT=DONT + constants.BULLET_POINT + donts + "\n"
+    context.bot.send_message(text="Do:\n" + DO + "\n" +"Don't:\n"+ DONT,
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
     
