@@ -258,6 +258,9 @@ def cancel(update, context):
     context.bot.send_message(text=constants.CANCEL_MESSAGE,
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
+    
+    # Need to redefine state here so that it does not interfere with back button
+    CURRENT["state"] = None
 
     return ConversationHandler.END
 
