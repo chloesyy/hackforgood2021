@@ -21,6 +21,7 @@ CATEGORY, QUESTIONS, REPLY, CANCEL, BACK = range(5)
 # TEMP STORE
 DATA = {}
 CURRENT = {}
+CURRENT["state"] = None
 
 # Define psql connectors
 conn = None
