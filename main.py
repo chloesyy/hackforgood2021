@@ -236,7 +236,7 @@ def category_detail(update, context):
     query = update.callback_query
     if CURRENT["state"] == DETAILS:
         logger.info("User clicked on category {}".format(query.data))
-        CURRENT["detail"] = query.data
+        CURRENT["detail"] = "Dos_n_Donts"
     logger.info("User clicked on{}".format(query.data))
     if CURRENT["detail"]=="Dos_n_Donts":
         do = []
