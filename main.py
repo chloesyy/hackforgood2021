@@ -249,7 +249,7 @@ def category_detail(update, context):
         DO = DO + constants.BULLET_POINT + dos + "\n"
     for donts in dont:
         DONT=DONT + constants.BULLET_POINT + donts + "\n"
-    context.bot.send_message(text="<b>Do: <b>\n" + DO + "\n" +"<b>Don't: <b>\n"+ DONT,
+    context.bot.send_message(text="Do: \n" + DO + "\n" +"Don't: \n"+ DONT,
                             chat_id=query.message.chat_id,
                             parse_mode=ParseMode.HTML)
 """
