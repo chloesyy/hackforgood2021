@@ -13,10 +13,10 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES, DETAILS = range(7)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS = range(7)
 
 # Callback data
-CATEGORY, QUESTIONS, REPLY, CANCEL, BACK = range(5)
+CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
 
 # TEMP STORE
 DATA = {}
@@ -253,7 +253,7 @@ def back(update, context):
         # Show category details
         logger.info("Going back to CATEGORIES")
         new_state = show_category(update, context)
-    #todo
+
     return new_state
 
 def cancel(update, context):
