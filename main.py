@@ -230,7 +230,7 @@ def category_detail(update, context):
                              parse_mode=ParseMode.HTML)
     
 def back(update, context):
-    if CURRENT["state"] = QUESTION:
+    if CURRENT["state"] == QUESTION:
         # Show choice menu
         start(update, context)
         return CHOICE
