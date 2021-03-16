@@ -243,9 +243,11 @@ def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION or CHOICE:
         # Show choice menu
-        logger.info("supposed to call start now")
+        logger.info("Going back to START")
         new_state = start(update, context)
-        logger.info(new_state)
+    elif CURRENT["state"] == CATEGORIES:
+        logger.info("Going back to CHOICE")
+        new_state = categories(update, context)
     #todo
     return new_state
 
