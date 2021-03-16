@@ -6,3 +6,6 @@ def reply_answer(question, reply):
 
 def reply_to_user(question, reply):
     return '<b>GOOD NEWS! The organisation has replied to one of your questions.</b> \n\n<b>Your question:</b> \n' + question + '\n\n<b>Answer:</b> \n' + reply
+
+def get_intro_text(community, about):
+    return '<b>Community: </b>' + community + '\n\n<b>About Community: </b>\n' + about + '\n\n\nClick one of the options below to learn more about this community.'

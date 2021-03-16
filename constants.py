@@ -16,8 +16,8 @@ TIME_TO_ENTREPRET = '-432918969'
 APPROVED_ORGANISATIONS = [TIME_TO_ENTREPRET, TEST]
 
 # Details
-CATEGORY_DETAILS = ["Introduction", "Do's and Dont's", "Organisations"]
-ORGANISATION_DETAILS = ["About the Orgnisation", "Volunteers Needed", "Go to Website"]
+CATEGORY_DETAILS = ["Do's and Dont's", "Organisations"]
+ORGANISATION_DETAILS = ["Volunteers Needed", "Go to Website"]
 
 # Symbols
 BULLET_POINT = '&#8226'

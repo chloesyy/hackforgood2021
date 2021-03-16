@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES = range(5)
+CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES, DETAILS = range(6)
 
 # Callback data
 CATEGORY, QUESTIONS, REPLY, CANCEL, BACK = range(5)
@@ -192,13 +192,20 @@ def show_category(update, context):
         button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
     button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
-    
     keyboard = InlineKeyboardMarkup(button_list)
 
-    context.bot.send_message(text=query.data,
+    about = ""    
+    for key in DATA["categories"]:
+        if DATA["categories"][key]["Community"] is query.data:
+            about = DATA["categories"][key]["About_Community"]
+    intro_text = responses.get_intro_text(query.data, about)
+    
+    context.bot.send_message(text=intro_text,
                              chat_id=query.message.chat_id,
                              reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
+    
+    return DETAILS
 
 def category_detail(update, context):
     """
@@ -243,10 +250,14 @@ def main():
     categories_handler = []
     for category in DATA["list_categories"]:
         categories_handler.append(CallbackQueryHandler(show_category, pattern='^' + category + '$'))
-    for detail in constants.CATEGORY_DETAILS:
-        categories_handler.append(CallbackQueryHandler(category_detail, pattern='^' + detail + '$'))
     categories_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     categories_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+
+    details_handler = []
+    for detail in constants.CATEGORY_DETAILS:
+        details_handler.append(CallbackQueryHandler(category_detail, pattern='^' + detail + '$'))
+    details_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
+    details_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
     
     # Add conversation handler with predefined states:
     conv_handler = ConversationHandler(
@@ -259,6 +270,7 @@ def main():
             QUESTION: [MessageHandler(Filters.text, ask_question),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             CATEGORIES: categories_handler,
+            DETAILS: details_handler,
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
