@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES, DETAILS = range(6)
+START, CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES, DETAILS = range(7)
 
 # Callback data
 CATEGORY, QUESTIONS, REPLY, CANCEL, BACK = range(5)
@@ -39,6 +39,8 @@ def start(update, context):
     Send a message when the command /start is issued.
     """
     logger.info('State: START')
+    CURRENT["state"] = START
+
     user = update.message.from_user
     
     # Check if chat_id is an organisation
@@ -75,6 +77,7 @@ def ask_question_intro(update, context):
     Question intro line
     """
     logger.info('State: CHOICE - Waiting for question...')
+    CURRENT["state"] = CHOICE
 
     query = update.callback_query
     context.bot.answer_callback_query(query.id, text=query.data)
@@ -90,6 +93,7 @@ def ask_question(update, context):
     Allow user to ask questions to organisations.
     """
     logger.info('State: QUESTION')
+    CURRENT["state"] = QUESTION
 
     user = update.message.from_user
     text = update.message.text
@@ -122,6 +126,7 @@ def reply_question(update, context):
     Allow organisations to reply questions.
     """
     logger.info('State: ORGANISATION - Replying...')
+    CURRENT["state"] = ORGANISATION
 
     text = update.message.text
     message_id = update.message.reply_to_message.message_id
@@ -158,6 +163,7 @@ def categories(update, context):
     Allow user to choose amongst various volunteering categories.
     """
     logger.info('State: CHOICE - Showing categories...')
+    CURRENT["state"] = CHOICE
 
     query = update.callback_query
     context.bot.answer_callback_query(query.id, text=query.data)
@@ -185,6 +191,7 @@ def show_category(update, context):
 
     logger.info("User clicked on category {}".format(query.data))
     
+    CURRENT["state"] = CATEGORIES
     CURRENT["category"] = query.data
     
     button_list = []
@@ -211,6 +218,10 @@ def category_detail(update, context):
     """
     Show the information requested by user
     """
+    CURRENT["state"] = DETAILS
+    
+    #todo
+
     query = update.callback_query
     
     context.bot.send_message(text=query.data,
