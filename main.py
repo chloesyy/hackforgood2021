@@ -205,6 +205,8 @@ def show_category(update, context):
     CURRENT["state"] = CATEGORIES
     CURRENT["category"] = query.data
     
+    logger.info(CURRENT["state"])
+    
     button_list = []
     for detail in constants.CATEGORY_DETAILS:
         button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
