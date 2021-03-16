@@ -86,10 +86,16 @@ def ask_question_intro(update, context):
     CURRENT["state"] = CHOICE
 
     query = update.callback_query
+    
+    button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
+                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    keyboard = InlineKeyboardMarkup(button_list)
+    
     context.bot.answer_callback_query(query.id, text=query.data)
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
                              chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
     
     return QUESTION
@@ -237,7 +243,7 @@ def category_detail(update, context):
     
 def back(update, context):
     new_state = None
-    if CURRENT["state"] == QUESTION:
+    if CURRENT["state"] == QUESTION or CHOICE:
         # Show choice menu
         logger.info("supposed to call start now")
         new_state = start(update, context)
@@ -293,6 +299,7 @@ def main():
         states={
             CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORY) + '$'),
                      CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
+                     CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
                        CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
