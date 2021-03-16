@@ -196,7 +196,7 @@ def show_category(update, context):
 
     about = ""    
     for key in DATA["categories"]:
-        if DATA["categories"][key]["Community"] is query.data:
+        if DATA["categories"][key]["Community"] == query.data:
             about = DATA["categories"][key]["About_Community"]
     intro_text = responses.get_intro_text(query.data, about)
     
