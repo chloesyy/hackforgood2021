@@ -47,7 +47,6 @@ def start(update, context):
     logger.info('State: START')
     CURRENT["state"] = START
     
-    
     # Check if chat_id is an organisation
     if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
         context.bot.send_message(text=constants.START_MESSAGE_ORG,
@@ -235,12 +234,12 @@ def category_detail(update, context):
                              parse_mode=ParseMode.HTML)
     
 def back(update, context):
+    new_state = None
     if CURRENT["state"] == QUESTION:
         # Show choice menu
-        start(update, context)
-        return CHOICE
+        new_state = start(update, context)
     #todo
-    return
+    return new_state
 
 def cancel(update, context):
     """
