@@ -38,10 +38,14 @@ def start(update, context):
     """
     Send a message when the command /start is issued.
     """
+    if CURRENT["state"] is not None:
+        user = update.callback_query.message.chat_id
+    else:
+        user = update.message.from_user
+    
     logger.info('State: START')
     CURRENT["state"] = START
-
-    user = update.message.from_user
+    
     
     # Check if chat_id is an organisation
     if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
