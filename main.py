@@ -234,24 +234,25 @@ def category_detail(update, context):
     #todo
 
     query = update.callback_query
-    CURRENT["detail"]="Dos_n_Donts"
+
     logger.info("User clicked on{}".format(query.data))
-    if CURRENT["detail"]=="Dos_n_Donts":
-        do = []
-        dont = []
-        for key in DATA["categories"]:
-            if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
-                do=DATA["categories"][key]["Dos_n_Donts"][0]
-                dont=DATA["categories"][key]["Dos_n_Donts"][1]
-        DO=""
-        DONT=""
-        for dos in do:
-            DO = DO + constants.BULLET_POINT + dos + "\n"
-        for donts in dont:
-            DONT=DONT + constants.BULLET_POINT + donts + "\n"
-        context.bot.send_message(text="<b>Do: <b>\n" + DO + "\n" +"<b>Don't: <b>\n"+ DONT,
-                                chat_id=query.message.chat_id,
-                                parse_mode=ParseMode.HTML)
+    #if CURRENT["detail"]=="Dos_n_Donts":
+    do = []
+    dont = []
+    for key in DATA["categories"]:
+        if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
+            do=DATA["categories"][key]["Dos_n_Donts"][0]
+            dont=DATA["categories"][key]["Dos_n_Donts"][1]
+    DO=""
+    DONT=""
+    for dos in do:
+        DO = DO + constants.BULLET_POINT + dos + "\n"
+    for donts in dont:
+        DONT=DONT + constants.BULLET_POINT + donts + "\n"
+    context.bot.send_message(text="<b>Do: <b>\n" + DO + "\n" +"<b>Don't: <b>\n"+ DONT,
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+"""
     elif CURRENT["detail"]=="Organisations":
         org=""
         for key in DATA["categories"]:
@@ -265,6 +266,7 @@ def category_detail(update, context):
         context.bot.send_message(text="Error!",
                                 chat_id=query.message.chat_id,
                                 parse_mode=ParseMode.HTML)       
+"""
 def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
