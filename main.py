@@ -243,7 +243,7 @@ def category_detail(update, context):
     
 def back(update, context):
     new_state = None
-    if CURRENT["state"] == QUESTION or CHOICE:
+    if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
         # Show choice menu
         logger.info("Going back to START")
         new_state = start(update, context)
