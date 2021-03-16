@@ -198,15 +198,14 @@ def show_category(update, context):
     """
     Show the chosen category
     """
-    query = update.callback_query
-
-    logger.info("User clicked on category {}".format(query.data))
+    
+    if CURRENT["state"] != DETAILS:
+        query = update.callback_query
+        logger.info("User clicked on category {}".format(query.data))
+        CURRENT["category"] = query.data
     
     CURRENT["state"] = CATEGORIES
-    CURRENT["category"] = query.data
-    
-    logger.info(CURRENT["state"])
-    
+
     button_list = []
     for detail in constants.CATEGORY_DETAILS:
         button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
@@ -216,9 +215,9 @@ def show_category(update, context):
 
     about = ""    
     for key in DATA["categories"]:
-        if DATA["categories"][key]["Community"] == query.data:
+        if DATA["categories"][key]["Community"] == CURRENT["category"]:
             about = DATA["categories"][key]["About_Community"]
-    intro_text = responses.get_intro_text(query.data, about)
+    intro_text = responses.get_intro_text(CURRENT["category"], about)
     
     context.bot.send_message(text=intro_text,
                              chat_id=query.message.chat_id,
@@ -237,7 +236,7 @@ def category_detail(update, context):
 
     query = update.callback_query
     
-    context.bot.send_message(text=query.data,
+    context.bot.send_message(text=CURRENT["category"],
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
     
@@ -248,8 +247,13 @@ def back(update, context):
         logger.info("Going back to START")
         new_state = start(update, context)
     elif CURRENT["state"] == CATEGORIES:
+        # Show categories
         logger.info("Going back to CHOICE")
         new_state = categories(update, context)
+    elif CURRENT["state"] == DETAILS:
+        # Show category details
+        logger.info("Going back to CATEGORIES")
+        new_state = show_category(update, context)
     #todo
     return new_state
 
