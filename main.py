@@ -234,12 +234,15 @@ def category_detail(update, context):
     #todo
 
     query = update.callback_query
+    if CURRENT["state"] == DETAILS:
+        logger.info("User clicked on category {}".format(query.data))
+        CURRENT["detail"] = query.data
     logger.info("User clicked on{}".format(query.data))
-    if CURRENT["category"]=="Dos_n_Donts":
+    if CURRENT["detail"]=="Dos_n_Donts":
         do = []
         dont = []
         for key in DATA["categories"]:
-            if DATA["categories"][key]["Community"]==CURRENT["category"]:
+            if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
                 do=DATA["categories"][key]["Dos_n_Donts"][0]
                 dont=DATA["categories"][key]["Dos_n_Donts"][1]
         DO=""
@@ -248,19 +251,22 @@ def category_detail(update, context):
             DO = DO + constants.BULLET_POINT + dos + "\n"
         for donts in dont:
             DONT=DONT + constants.BULLET_POINT + donts + "\n"
-        context.bot.send_message(text="Do:\n" + DO + "\n" +"Don't:\n"+ DONT,
+        context.bot.send_message(text="<b>Do: <b>\n" + DO + "\n" +"<b>Don't: <b>\n"+ DONT,
                                 chat_id=query.message.chat_id,
                                 parse_mode=ParseMode.HTML)
-    elif CURRENT["category"]=="Organisations":
+    elif CURRENT["detail"]=="Organisations":
         org=""
         for key in DATA["categories"]:
             if DATA["categories"][key]["Community"]==CURRENT["category"]:
                 for o in DATA["categories"][key]["Organisations"]:
                     org=org+constants.BULLET_POINT + o +"\n"
-        context.bot.send_message(text="List of organizations:\n" + org ,
+        context.bot.send_message(text="<b>List of organizations: <b>\n" + org ,
                                 chat_id=query.message.chat_id,
                                 parse_mode=ParseMode.HTML)
-    
+    else:
+        context.bot.send_message(text="Error!",
+                                chat_id=query.message.chat_id,
+                                parse_mode=ParseMode.HTML)       
 def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
