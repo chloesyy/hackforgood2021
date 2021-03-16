@@ -30,9 +30,7 @@ cur = None
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
 logger = logging.getLogger(__name__)
-
 logger.info('Bot started...')
 
 def start(update, context):
@@ -185,7 +183,7 @@ def categories(update, context):
 
     for category in DATA["list_categories"]:
         button_list.append([InlineKeyboardButton(text=category, callback_data=category)])
-    
+    button_list.append([InlineKeyboardButton(text='Back', callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
     
