@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS = range(6)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS= range(7)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
@@ -224,7 +224,7 @@ def show_category(update, context):
                              parse_mode=ParseMode.HTML)
     
     return DETAILS
-
+#NEWWWWW
 def category_detail(update, context):
     """
     Show the information requested by user
@@ -236,37 +236,56 @@ def category_detail(update, context):
     query = update.callback_query
 
     logger.info("User clicked on{}".format(query.data))
-    #if CURRENT["detail"]=="Dos_n_Donts":
-    do = []
-    dont = []
-    for key in DATA["categories"]:
-        if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
-            do=DATA["categories"][key]["Dos_n_Donts"][0]
-            dont=DATA["categories"][key]["Dos_n_Donts"][1]
-    DO=""
-    DONT=""
-    for dos in do:
-        DO = DO + constants.BULLET_POINT + dos + "\n"
-    for donts in dont:
-        DONT=DONT + constants.BULLET_POINT + donts + "\n"
-    context.bot.send_message(text="Do: \n" + DO + "\n" +"Don't: \n"+ DONT,
-                            chat_id=query.message.chat_id,
-                            parse_mode=ParseMode.HTML)
-"""
+    if CURRENT["detail"]=="Dos_n_Donts":
+        do = []
+        dont = []
+        for key in DATA["categories"]:
+            if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
+                do=DATA["categories"][key]["Dos_n_Donts"][0]
+                dont=DATA["categories"][key]["Dos_n_Donts"][1]
+        DO=""
+        DONT=""
+        for dos in do:
+            DO = DO + constants.BULLET_POINT +" "+ dos + "\n"
+        for donts in dont:
+            DONT=DONT + constants.BULLET_POINT +" "+ donts + "\n"
+        context.bot.send_message(text="Do: \n" + DO + "\n" +"Don't: \n"+ DONT,
+                                 chat_id=query.message.chat_id,
+                                 parse_mode=ParseMode.HTML)
+
     elif CURRENT["detail"]=="Organisations":
-        org=""
+        button_list=[]
         for key in DATA["categories"]:
             if DATA["categories"][key]["Community"]==CURRENT["category"]:
                 for o in DATA["categories"][key]["Organisations"]:
-                    org=org+constants.BULLET_POINT + o +"\n"
-        context.bot.send_message(text="<b>List of organizations: <b>\n" + org ,
-                                chat_id=query.message.chat_id,
-                                parse_mode=ParseMode.HTML)
+                    button_list.append([InlineKeyboardButton(text=o, callback_data=o)]) #Creating the button for the organization
+        keyboard = InlineKeyboardMarkup(button_list)        
+        context.bot.send_message(text=constants.ORGANISATION_MESSAGE,
+                                 chat_id=query.message.chat_id,
+                                 reply_markup=keyboard,
+                                 parse_mode=ParseMode.HTML)
+        return ORG_DEETS
+
     else:
         context.bot.send_message(text="Error!",
-                                chat_id=query.message.chat_id,
-                                parse_mode=ParseMode.HTML)       
-"""
+                                 chat_id=query.message.chat_id,
+                                 parse_mode=ParseMode.HTML)  
+#NEWWWWW
+def organisation_detail(update,context):
+    CURRENT["state"]= ORG_DEETS     
+    query = update.callback_query
+    logger.info("User clicked on{}".format(query.data))
+    button_list = []
+    for detail in constants.ORGANISATION_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
+        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
+    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    keyboard = InlineKeyboardMarkup(button_list)
+    context.bot.send_message(text=constants.ORGANISATION_DETAIL_MESSAGE,
+                             chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
+                             parse_mode=ParseMode.HTML)
+
 def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
