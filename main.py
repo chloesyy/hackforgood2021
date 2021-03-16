@@ -237,7 +237,9 @@ def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION:
         # Show choice menu
+        logger.debug("supposed to call start now")
         new_state = start(update, context)
+        logger.debug(new_state)
     #todo
     return new_state
 
