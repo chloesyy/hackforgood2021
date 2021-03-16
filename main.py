@@ -13,14 +13,15 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, REPLY, CATEGORIES, DETAILS = range(7)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS = range(6)
 
 # Callback data
-CATEGORY, QUESTIONS, REPLY, CANCEL, BACK = range(5)
+CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
 
 # TEMP STORE
 DATA = {}
 CURRENT = {}
+CURRENT["state"] = None
 
 # Define psql connectors
 conn = None
@@ -29,24 +30,27 @@ cur = None
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
 logger = logging.getLogger(__name__)
-
 logger.info('Bot started...')
 
 def start(update, context):
     """
     Send a message when the command /start is issued.
     """
+    if CURRENT["state"] is not None:
+        user = update.callback_query.message.chat
+        chat_id = user
+    else:
+        user = update.message.from_user
+        chat_id = update.message.chat.id
+    
     logger.info('State: START')
     CURRENT["state"] = START
-
-    user = update.message.from_user
     
     # Check if chat_id is an organisation
-    if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
+    if str(chat_id) in constants.APPROVED_ORGANISATIONS:
         context.bot.send_message(text=constants.START_MESSAGE_ORG,
-                                 chat_id=update.message.chat.id,
+                                 chat_id=chat_id,
                                  parse_mode=ParseMode.HTML)
         return ORGANISATION
     
@@ -80,10 +84,16 @@ def ask_question_intro(update, context):
     CURRENT["state"] = CHOICE
 
     query = update.callback_query
+    
+    button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
+                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    keyboard = InlineKeyboardMarkup(button_list)
+    
     context.bot.answer_callback_query(query.id, text=query.data)
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
                              chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
     
     return QUESTION
@@ -100,7 +110,8 @@ def ask_question(update, context):
     
     response = responses.send_to_group(text)
     
-    button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
+                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
@@ -172,7 +183,7 @@ def categories(update, context):
 
     for category in DATA["list_categories"]:
         button_list.append([InlineKeyboardButton(text=category, callback_data=category)])
-    
+    button_list.append([InlineKeyboardButton(text='Back', callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
     
@@ -188,12 +199,12 @@ def show_category(update, context):
     Show the chosen category
     """
     query = update.callback_query
-
-    logger.info("User clicked on category {}".format(query.data))
-    
     CURRENT["state"] = CATEGORIES
-    CURRENT["category"] = query.data
     
+    if CURRENT["state"] != DETAILS:
+        logger.info("User clicked on category {}".format(query.data))
+        CURRENT["category"] = query.data
+
     button_list = []
     for detail in constants.CATEGORY_DETAILS:
         button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
@@ -203,9 +214,9 @@ def show_category(update, context):
 
     about = ""    
     for key in DATA["categories"]:
-        if DATA["categories"][key]["Community"] == query.data:
+        if DATA["categories"][key]["Community"] == CURRENT["category"]:
             about = DATA["categories"][key]["About_Community"]
-    intro_text = responses.get_intro_text(query.data, about)
+    intro_text = responses.get_intro_text(CURRENT["category"], about)
     
     context.bot.send_message(text=intro_text,
                              chat_id=query.message.chat_id,
@@ -224,13 +235,26 @@ def category_detail(update, context):
 
     query = update.callback_query
     
-    context.bot.send_message(text=query.data,
+    context.bot.send_message(text=CURRENT["category"],
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
     
 def back(update, context):
-    #todo
-    return
+    new_state = None
+    if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
+        # Show choice menu
+        logger.info("Going back to START")
+        new_state = start(update, context)
+    elif CURRENT["state"] == CATEGORIES:
+        # Show categories
+        logger.info("Going back to CHOICE")
+        new_state = categories(update, context)
+    elif CURRENT["state"] == DETAILS:
+        # Show category details
+        logger.info("Going back to CATEGORIES")
+        new_state = show_category(update, context)
+
+    return new_state
 
 def cancel(update, context):
     """
@@ -245,6 +269,9 @@ def cancel(update, context):
     context.bot.send_message(text=constants.CANCEL_MESSAGE,
                              chat_id=query.message.chat_id,
                              parse_mode=ParseMode.HTML)
+    
+    # Need to redefine state here so that it does not interfere with back button
+    CURRENT["state"] = None
 
     return ConversationHandler.END
 
@@ -277,8 +304,10 @@ def main():
         states={
             CHOICE: [CallbackQueryHandler(categories, pattern='^' + str(CATEGORY) + '$'),
                      CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
+                     CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
+                       CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
