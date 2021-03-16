@@ -40,17 +40,19 @@ def start(update, context):
     Send a message when the command /start is issued.
     """
     if CURRENT["state"] is not None:
-        user = update.callback_query.message.chat_id
+        user = update.callback_query.message.chat
+        chat_id = user
     else:
         user = update.message.from_user
+        chat_id = update.message.chat.id
     
     logger.info('State: START')
     CURRENT["state"] = START
     
     # Check if chat_id is an organisation
-    if str(update.message.chat.id) in constants.APPROVED_ORGANISATIONS:
+    if str(chat_id) in constants.APPROVED_ORGANISATIONS:
         context.bot.send_message(text=constants.START_MESSAGE_ORG,
-                                 chat_id=update.message.chat.id,
+                                 chat_id=chat_id,
                                  parse_mode=ParseMode.HTML)
         return ORGANISATION
     
@@ -237,9 +239,9 @@ def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION:
         # Show choice menu
-        logger.debug("supposed to call start now")
+        logger.info("supposed to call start now")
         new_state = start(update, context)
-        logger.debug(new_state)
+        logger.info(new_state)
     #todo
     return new_state
 
