@@ -235,21 +235,31 @@ def category_detail(update, context):
 
     query = update.callback_query
     logger.info("User clicked on{}".format(query.data))
-    do = []
-    dont = []
-    for key in DATA["categories"]:
-        if DATA["categories"][key]["Community"]==CURRENT["category"]:
-            do=DATA["categories"][key]["Dos_n_Donts"][0]
-            dont=DATA["categories"][key]["Dos_n_Donts"][1]
-    DO=""
-    DONT=""
-    for dos in do:
-        DO = DO + constants.BULLET_POINT + dos + "\n"
-    for donts in dont:
-        DONT=DONT + constants.BULLET_POINT + donts + "\n"
-    context.bot.send_message(text="Do:\n" + DO + "\n" +"Don't:\n"+ DONT,
-                             chat_id=query.message.chat_id,
-                             parse_mode=ParseMode.HTML)
+    if CURRENT["category"]=="Dos_n_Donts":
+        do = []
+        dont = []
+        for key in DATA["categories"]:
+            if DATA["categories"][key]["Community"]==CURRENT["category"]:
+                do=DATA["categories"][key]["Dos_n_Donts"][0]
+                dont=DATA["categories"][key]["Dos_n_Donts"][1]
+        DO=""
+        DONT=""
+        for dos in do:
+            DO = DO + constants.BULLET_POINT + dos + "\n"
+        for donts in dont:
+            DONT=DONT + constants.BULLET_POINT + donts + "\n"
+        context.bot.send_message(text="Do:\n" + DO + "\n" +"Don't:\n"+ DONT,
+                                chat_id=query.message.chat_id,
+                                parse_mode=ParseMode.HTML)
+    elif CURRENT["category"]=="Organisations":
+        org=""
+        for key in DATA["categories"]:
+            if DATA["categories"][key]["Community"]==CURRENT["category"]:
+                for o in DATA["categories"][key]["Organisations"]:
+                    org=org+constants.BULLET_POINT + o +"\n"
+        context.bot.send_message(text="List of organizations:\n" + org ,
+                                chat_id=query.message.chat_id,
+                                parse_mode=ParseMode.HTML)
     
 def back(update, context):
     new_state = None
