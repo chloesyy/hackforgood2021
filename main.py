@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS = range(7)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS = range(6)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
