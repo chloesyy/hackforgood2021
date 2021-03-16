@@ -1,0 +1,23 @@
+{
+    "Community": "Visually Impaired",
+
+    "About_Community": "Visual impairment ranges from partial vision loss to complete blindness.",
+    
+    "Dos_n_Donts": [
+        [
+            "Speak to them directly",
+            "Include them in conversations without using hand gestures",
+            "Approach, ask, assist. Do ask before you assist them."
+        ],
+        [
+            "Assume they are helpless",
+            "Touch them without asking beforehand",
+            "If they have a guide dog, do not speak to the dog without their permission."
+        ]
+    ],
+
+    "Organisations": [
+        "Singapore Association for the Visually Handicapped (SAVH)",
+        "Orbis Singapore"
+    ]
+}
