@@ -238,7 +238,7 @@ def category_detail(update, context):
     do = []
     dont = []
     for key in DATA["categories"]:
-        if DATA["categories"][key]["Community"]==query.data:
+        if DATA["categories"][key]["Community"]==CURRENT["category"]:
             do=DATA["categories"][key]["Dos_n_Donts"][0]
             dont=DATA["categories"][key]["Dos_n_Donts"][1]
     DO=""
