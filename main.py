@@ -100,7 +100,8 @@ def ask_question(update, context):
     
     response = responses.send_to_group(text)
     
-    button_list = [[InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
+                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
@@ -229,6 +230,10 @@ def category_detail(update, context):
                              parse_mode=ParseMode.HTML)
     
 def back(update, context):
+    if CURRENT["state"] = QUESTION:
+        # Show choice menu
+        start(update, context)
+        return CHOICE
     #todo
     return
 
@@ -279,6 +284,7 @@ def main():
                      CallbackQueryHandler(ask_question_intro, pattern='^' + str(QUESTIONS) + '$'),
                      CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             QUESTION: [MessageHandler(Filters.text, ask_question),
+                       CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
