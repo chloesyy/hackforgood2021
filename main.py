@@ -277,7 +277,6 @@ def category_detail(update, context):
                                  reply_markup=keyboard,
                                  parse_mode=ParseMode.HTML)
         new_state = ORG_DEETS
-        print("Hello")
 
     else:
         context.bot.send_message(text="Error!",
@@ -367,6 +366,7 @@ def main():
 
     org_deets_handler = []
     for org in DATA["list_organisations"]:
+        logger.info(org)
         org_deets_handler.append(CallbackQueryHandler(organisation_detail, pattern='^' + org + '$'))
     org_deets_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     org_deets_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
