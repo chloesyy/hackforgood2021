@@ -21,7 +21,7 @@ ORGANISATION_DETAILS = ["Volunteers Needed", "Go to Website"]
 
 # Symbols
 BULLET_POINT = '&#8226'
-LEFT_ARROW = 'u"\u00AB"'
+LEFT_ARROW = '\u00AB'
 
 # Messages
 START_MESSAGE = 'Hello! Welcome to the Volunteer Handbook. Here, you can ask questions or explore our libraries for information on volunteering at various organisations. \n\n Currently, this bot supports: \n' + BULLET_POINT + ' Sending questions to the adminstrators'
