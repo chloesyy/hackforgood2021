@@ -16,7 +16,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryH
 START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS= range(7)
 
 # Callback data
-CATEGORY, QUESTIONS, CANCEL, BACK, CLICK_CAT = range(5)
+CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
 
 # TEMP STORE
 DATA = {}
@@ -182,7 +182,7 @@ def categories(update, context):
     button_list = []
 
     for category in DATA["list_categories"]: #these are all the categories(Disability) 
-        button_list.append([InlineKeyboardButton(text=category, callback_data=str(CLICK_CAT))]) #Creating the buttons to show each category
+        button_list.append([InlineKeyboardButton(text=category, callback_data=category)]) #Creating the buttons to show each category
     button_list.append([InlineKeyboardButton(text='Back', callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
@@ -350,7 +350,8 @@ def main():
     dispatcher = updater.dispatcher
     
     categories_handler = []
-    categories_handler.append(CallbackQueryHandler(show_category, pattern='^' + str(CLICK_CAT) + '$'))
+    for category in DATA["list_categories"]:
+        categories_handler.append(CallbackQueryHandler(show_category, pattern='^' + category + '$'))
     categories_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     categories_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
 
