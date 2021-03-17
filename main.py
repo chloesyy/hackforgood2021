@@ -38,6 +38,15 @@ def start(update, context):
     Send a message when the command /start is issued.
     """
     if CURRENT["state"] is not None:
+        # To guard against users who send /start multiple times without cancelling conversation
+        if update.callback_query is None:
+            CURRENT["state"] = None
+            context.bot.send_message(text=constants.ERROR_MESSAGE,
+                                     chat_id=update.message.chat.id, 
+                                     parse_mode=ParseMode.HTML)
+            
+            return ConversationHandler.END
+
         user = update.callback_query.message.chat
         chat_id = user
     else:
@@ -88,8 +97,6 @@ def ask_question_intro(update, context):
     button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
                    [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
-    
-    context.bot.answer_callback_query(query.id, text=query.data)
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
                              chat_id=query.message.chat_id,
@@ -178,7 +185,6 @@ def categories(update, context):
     CURRENT["state"] = CHOICE
 
     query = update.callback_query
-    context.bot.answer_callback_query(query.id, text=query.data)
     
     button_list = []
 
@@ -326,6 +332,28 @@ def organisation_detail(update, context):
     
     return VOLUNTEERS
 
+def volunteers(update, context):
+
+    query = update.callback_query
+
+    CURRENT["state"] = VOLUNTEERS
+    CURRENT["org_deet"] = query.data
+    logger.info("User clicked on {}".format(CURRENT["org_deet"]))
+
+    volunteer_info = ""
+    button_list=[]
+    for key in DATA["organisations"]:
+        if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
+            for v in DATA["organisations"][key]["Volunteering_Roles"]:
+                volunteer_info += constants.BULLET_POINT + " " + v + "\n"
+    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    keyboard = InlineKeyboardMarkup(button_list)
+    context.bot.send_message(text="<b>Volunteering Roles:</b> \n" + volunteer_info,
+                             chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
+                             parse_mode=ParseMode.HTML)
+
 ###----------------------------------------- BACK / CANCEL BUTTONS -----------------------------------------###
 
 # BACK BUTTON
@@ -361,9 +389,12 @@ def cancel(update, context):
     User cancelation function. Cancel conversation by user.
     """
     query = update.callback_query
-    context.bot.answer_callback_query(query.id, text=query.data)
+    if query is None:
+        query = update
+        user = update.message.from_user
+    else:
+        user = query.from_user
 
-    user = query.from_user
     logger.info("User {} canceled the conversation.".format(user.first_name))
     
     context.bot.send_message(text=constants.CANCEL_MESSAGE,
@@ -403,7 +434,6 @@ def main():
 
     org_deets_handler = []
     for org in DATA["list_organisations"]:
-        logger.info(org)
         org_deets_handler.append(CallbackQueryHandler(organisation_detail, pattern='^' + org + '$'))
     org_deets_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     org_deets_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
@@ -423,6 +453,9 @@ def main():
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
             ORG_DEETS: org_deets_handler,
+            VOLUNTEERS: [CallbackQueryHandler(volunteers, pattern='^' + constants.ORGANISATION_DETAILS[0] + '$'), 
+                            CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
+                            CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
@@ -472,9 +505,6 @@ def load_files():
         DATA["organisations"][file_name] = json.load(file)
         DATA["list_organisations"].append(DATA["organisations"][file_name]["Organisation"])
 
-    logger.info(DATA["list_organisations"])
-
-# CONNECT TO DATABASE ON HEROKU           
 def connect_PSQL():
     try:
         logger.info("Connecting to PSQL...")

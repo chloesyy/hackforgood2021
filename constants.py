@@ -34,3 +34,5 @@ INVALID_REPLY = 'This is an invalid message to reply to!'
 CATEGORIES_MESSAGE = 'Please click on the category that you would like to learn about below.'
 ORGANISATION_MESSAGE = 'Please click on the organization that you would like to learn more about below.'
 ORGANISATION_DETAIL_MESSAGE = "Please click on what you would like to learn about."
+
+ERROR_MESSAGE = 'An error occurred. Please send /start to restart the conversation.'
