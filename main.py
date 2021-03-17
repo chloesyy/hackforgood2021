@@ -30,8 +30,6 @@ cur = None
 # Back and Cancel Buttons
 back_cancel_button = [InlineKeyboardButton(text=constants.LEFT_ARROW + 'Back', callback_data=str(BACK)),
                       InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]
-back_cancel_handler = [CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
-                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')]
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -424,6 +422,9 @@ def main():
     
     # Used to register handlers
     dispatcher = updater.dispatcher
+
+    back_cancel_handler = [CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
+                           CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')]
     
     categories_handler = []
     for category in DATA["list_categories"]:
