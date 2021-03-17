@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS = range(6)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS, VOLUNTEERS = range(8)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
@@ -181,8 +181,8 @@ def categories(update, context):
     
     button_list = []
 
-    for category in DATA["list_categories"]:
-        button_list.append([InlineKeyboardButton(text=category, callback_data=category)])
+    for category in DATA["list_categories"]: #these are all the categories(Disability) 
+        button_list.append([InlineKeyboardButton(text=category, callback_data=category)]) #Creating the buttons to show each category
     button_list.append([InlineKeyboardButton(text='Back', callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
@@ -199,15 +199,15 @@ def show_category(update, context):
     Show the chosen category
     """
     query = update.callback_query
-    CURRENT["state"] = CATEGORIES
+    CURRENT["state"] = CATEGORIES #Run this function with the current state = CATEGORIES
     
     if CURRENT["state"] != DETAILS:
         logger.info("User clicked on category {}".format(query.data))
         CURRENT["category"] = query.data
 
     button_list = []
-    for detail in constants.CATEGORY_DETAILS:
-        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)])
+    for detail in constants.CATEGORY_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
+        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
     button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
@@ -229,16 +229,96 @@ def category_detail(update, context):
     """
     Show the information requested by user
     """
-    CURRENT["state"] = DETAILS
-    
-    #todo
+    query = update.callback_query
+    new_state = None
 
+    # Define temp store
+    CURRENT["state"] = DETAILS
+    CURRENT["detail"] = query.data
+
+    logger.info("User clicked on {}".format(CURRENT["detail"]))
+    # Dos and Donts
+    if CURRENT["detail"] == constants.CATEGORY_DETAILS[0]:
+        dos = []
+        donts = []
+        button_list=[]
+        
+        for key in DATA["categories"]:
+            # If the current category is the same as the list of categories
+            if DATA["categories"][key]["Community"] == CURRENT["category"]: 
+                dos = DATA["categories"][key]["Dos_n_Donts"][0]
+                donts = DATA["categories"][key]["Dos_n_Donts"][1]
+                
+        response = responses.get_dos_n_donts(dos, donts)
+        
+        button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+        button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+        keyboard = InlineKeyboardMarkup(button_list)
+
+        context.bot.send_message(text=response,
+                                 chat_id=query.message.chat_id,
+                                 reply_markup=keyboard,
+                                 parse_mode=ParseMode.HTML)
+
+    # Organisations
+    elif CURRENT["detail"] == constants.CATEGORY_DETAILS[1]:
+        button_list = []
+        for key in DATA["categories"]:
+            if DATA["categories"][key]["Community"] == CURRENT["category"]:
+                for o in DATA["categories"][key]["Organisations"]:
+                    #Creating the button for the organization
+                    button_list.append([InlineKeyboardButton(text=o, callback_data=o)]) 
+        button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+        button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+        keyboard = InlineKeyboardMarkup(button_list)        
+
+        context.bot.send_message(text=constants.ORGANISATION_MESSAGE,
+                                 chat_id=query.message.chat_id,
+                                 reply_markup=keyboard,
+                                 parse_mode=ParseMode.HTML)
+        new_state = ORG_DEETS
+
+    else:
+        context.bot.send_message(text="Error!",
+                                 chat_id=query.message.chat_id,
+                                 parse_mode=ParseMode.HTML)  
+    
+    return new_state
+
+def organisation_detail(update, context):
+    """
+    Shows users the details of the organisation.
+    """
     query = update.callback_query
     
-    context.bot.send_message(text=CURRENT["category"],
+    CURRENT["state"] = ORG_DEETS
+    CURRENT["organisation"] = query.data
+    logger.info("User clicked on {}".format(CURRENT["organisation"]))
+
+    organisation_deets = {}
+    # Get details of organisation
+    for key in DATA["organisations"]:
+        if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
+            organisation_deets = DATA["organisations"][key]
+
+    response = responses.get_org_deets(organisation_deets)
+
+    button_list = []
+    for detail in constants.ORGANISATION_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
+        if detail == "Go to Website":
+            button_list.append([InlineKeyboardButton(text=detail, url=organisation_deets["Link"])])
+        else:
+            button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
+    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    keyboard = InlineKeyboardMarkup(button_list)
+    context.bot.send_message(text=response,
                              chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
     
+    return VOLUNTEERS
+
 def back(update, context):
     new_state = None
     if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
@@ -296,6 +376,13 @@ def main():
         details_handler.append(CallbackQueryHandler(category_detail, pattern='^' + detail + '$'))
     details_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     details_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+
+    org_deets_handler = []
+    for org in DATA["list_organisations"]:
+        logger.info(org)
+        org_deets_handler.append(CallbackQueryHandler(organisation_detail, pattern='^' + org + '$'))
+    org_deets_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
+    org_deets_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
     
     # Add conversation handler with predefined states:
     conv_handler = ConversationHandler(
@@ -311,6 +398,7 @@ def main():
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
+            ORG_DEETS: org_deets_handler,
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
@@ -356,6 +444,8 @@ def load_files():
         file = open(os.path.join(constants.ORGANISATIONS_FOLDER, organisation))
         DATA["organisations"][file_name] = json.load(file)
         DATA["list_organisations"].append(DATA["organisations"][file_name]["Organisation"])
+
+    logger.info(DATA["list_organisations"])
             
 def connect_PSQL():
     try:

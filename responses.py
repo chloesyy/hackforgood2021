@@ -1,3 +1,5 @@
+import constants
+
 def send_to_group(text):
     return '<b>Someone asked this:</b> \n\n' + text
 
@@ -9,3 +11,16 @@ def reply_to_user(question, reply):
 
 def get_intro_text(community, about):
     return '<b>Community: </b>' + community + '\n\n<b>About Community: </b>\n' + about + '\n\n\nClick one of the options below to learn more about this community.'
+
+def get_dos_n_donts(dos, donts):
+    DO = ""
+    DONT = ""
+    for do in dos:
+        DO += constants.BULLET_POINT + " " + do + "\n"
+    for dont in donts:
+        DONT += constants.BULLET_POINT + " " + dont + "\n"
+
+    return "<b>Do's:</b> \n" + DO + "\n" +"<b>Dont's</b>: \n"+ DONT
+
+def get_org_deets(org_deets):
+    return "<b>Organisation: </b>" + org_deets["Organisation"] + "\n\n<b>About Organisation: </b>\n" + org_deets["About_Organisation"]
