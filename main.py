@@ -224,41 +224,43 @@ def show_category(update, context):
                              parse_mode=ParseMode.HTML)
     
     return DETAILS
-#NEWWWWW
+
 def category_detail(update, context):
     """
     Show the information requested by user
     """
-    CURRENT["state"] = DETAILS
-    
-    #todo
-
     query = update.callback_query
+    
+    # Define temp store
+    CURRENT["state"] = DETAILS
+    CURRENT["detail"] = query.data
 
-    logger.info("User clicked on{}".format(query.data))
-    if CURRENT["detail"]=="Dos_n_Donts":
-        do = []
-        dont = []
+    logger.info("User clicked on {}".format(CURRENT["detail"]))
+    # Dos and Donts
+    if CURRENT["detail"] == constants.CATEGORY_DETAILS[0]:
+        dos = []
+        donts = []
         button_list=[]
+        
         for key in DATA["categories"]:
-            if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
-                do=DATA["categories"][key]["Dos_n_Donts"][0]
-                dont=DATA["categories"][key]["Dos_n_Donts"][1]
-        DO=""
-        DONT=""
-        for dos in do:
-            DO = DO + constants.BULLET_POINT +" "+ dos + "\n"
-        for donts in dont:
-            DONT=DONT + constants.BULLET_POINT +" "+ donts + "\n"
+            # If the current category is the same as the list of categories
+            if DATA["categories"][key]["Community"] == CURRENT["category"]: 
+                dos = DATA["categories"][key]["Dos_n_Donts"][0]
+                donts = DATA["categories"][key]["Dos_n_Donts"][1]
+                
+        response = responses.get_dos_n_donts(dos, donts)
+        
         button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
         button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
         keyboard = InlineKeyboardMarkup(button_list)
-        context.bot.send_message(text="Do: \n" + DO + "\n" +"Don't: \n"+ DONT,
+
+        context.bot.send_message(text=response,
                                  chat_id=query.message.chat_id,
                                  reply_markup=keyboard,
                                  parse_mode=ParseMode.HTML)
-
-    elif CURRENT["detail"]=="Organisations":
+                                 
+    # Dos and Donts
+    elif CURRENT["detail"] == constants.CATEGORY_DETAILS[1]:
         button_list=[]
         for key in DATA["categories"]:
             if DATA["categories"][key]["Community"]==CURRENT["category"]:
