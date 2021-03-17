@@ -298,7 +298,7 @@ def organisation_detail(update, context):
     organisation_deets = {}
     # Get details of organisation
     for key in DATA["organisations"]:
-        if DATA["organisations"][key]["Organisation"] == CURRENT["orgnisation"]:
+        if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
             organisation_deets = DATA["organisations"][key]
 
     response = responses.get_org_deets(organisation_deets)
