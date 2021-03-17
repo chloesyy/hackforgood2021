@@ -23,4 +23,4 @@ def get_dos_n_donts(dos, donts):
     return "<b>Do's:</b> \n" + DO + "\n" +"<b>Dont's</b>: \n"+ DONT
 
 def get_org_deets(org_deets):
-    return "<b>Organisation: </b>" + org_deets["Organisation"] + "\n\n<b>About: </b>" + org_deets["About_Organisation"]
+    return "<b>Organisation: </b>" + org_deets["Organisation"] + "\n\n<b>About Organisation: </b>\n" + org_deets["About_Organisation"]
