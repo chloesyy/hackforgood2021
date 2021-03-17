@@ -324,7 +324,7 @@ def organisation_detail(update, context):
                              parse_mode=ParseMode.HTML)
     
     return VOLUNTEERS
-    
+
 def volunteers(update, context):
 
     query = update.callback_query
@@ -429,7 +429,7 @@ def main():
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
             ORG_DEETS: org_deets_handler,
-            VOLUNTEERS: [CallbackQueryHandler(volunteers, pattern='^' + str(VOLUNTEERS)+ '$'), 
+            VOLUNTEERS: [CallbackQueryHandler(volunteers, pattern='^' + constants.ORGANISATION_DETAILS[0] + '$'), 
                             CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
                             CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
