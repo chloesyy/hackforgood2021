@@ -236,11 +236,11 @@ def category_detail(update, context):
     query = update.callback_query
     new_state = None
     
-    CURRENT["state"] = DETAILS # Run this function with the current state = CATEGORIES
-
     # Define temp store
+    if CURRENT["state"] != ORG_DEETS:
+        # Back button not pressed
+        CURRENT["detail"] = query.data
     CURRENT["state"] = DETAILS
-    CURRENT["detail"] = query.data
 
     logger.info("User clicked on {}".format(CURRENT["detail"]))
     # Dos and Donts
