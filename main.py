@@ -201,11 +201,12 @@ def show_category(update, context):
     Show the chosen category
     """
     query = update.callback_query
-    CURRENT["state"] = CATEGORIES #Run this function with the current state = CATEGORIES
-    
-    if CURRENT["state"] != DETAILS:
+
+    if CURRENT["state"] != DETAILS: # If didn't press back button (natural flow)
         logger.info("User clicked on category {}".format(query.data))
         CURRENT["category"] = query.data
+    
+    CURRENT["state"] = CATEGORIES # Run this function with the current state = CATEGORIES
 
     button_list = []
     for detail in constants.CATEGORY_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
@@ -234,6 +235,12 @@ def category_detail(update, context):
     """
     query = update.callback_query
     new_state = None
+
+    if CURRENT["state"] != ORG_DEETS: # If didn't press back button (natural flow)
+        logger.info("User clicked on detail {}".format(query.data))
+        CURRENT["category"] = query.data
+    
+    CURRENT["state"] = DETAILS # Run this function with the current state = CATEGORIES
 
     # Define temp store
     CURRENT["state"] = DETAILS
@@ -349,6 +356,7 @@ def back(update, context):
         logger.info("Going back to ORG_DEETS")
         new_state = organisation_detail(update,context)
 
+    # Must return the previous state
     return new_state
 
 # CANCEL BUTTON
