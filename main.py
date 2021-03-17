@@ -324,6 +324,28 @@ def organisation_detail(update, context):
                              parse_mode=ParseMode.HTML)
     
     return VOLUNTEERS
+    
+def volunteers(update, context):
+
+    query = update.callback_query
+
+    CURRENT["state"] = VOLUNTEERS
+    CURRENT["org_deet"] = query.data
+    logger.info("User clicked on {}".format(CURRENT["org_deet"]))
+
+    volunteer_info = ""
+    button_list=[]
+    for key in DATA["organisations"]:
+        if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
+            for v in DATA["organisations"][key]["Volunteering_Roles"]:
+                volunteer_info += constants.BULLET_POINT + " " + v + "\n"
+    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    keyboard = InlineKeyboardMarkup(button_list)
+    context.bot.send_message(text="<b>Volunteering Roles:</b> \n" + volunteer_info,
+                             chat_id=query.message.chat_id,
+                             reply_markup=keyboard,
+                             parse_mode=ParseMode.HTML)
 
 def back(update, context):
     new_state = None
@@ -407,6 +429,9 @@ def main():
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
             ORG_DEETS: org_deets_handler,
+            VOLUNTEERS: [CallbackQueryHandler(volunteers, pattern='^' + str(VOLUNTEERS)+ '$'), 
+                            CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
+                            CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
