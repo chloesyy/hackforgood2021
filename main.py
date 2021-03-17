@@ -287,6 +287,7 @@ def organisation_detail(update, context):
     Shows users the details of the organisation.
     """
     query = update.callback_query
+    context.bot.answer_callback_query(query.id, text=query.data)
     
     CURRENT["state"] = ORG_DEETS   
     CURRENT["organisation"] = query.data
