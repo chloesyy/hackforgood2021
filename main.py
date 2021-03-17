@@ -28,7 +28,7 @@ conn = None
 cur = None
 
 # Back and Cancel Buttons
-back_cancel_button = [InlineKeyboardButton(text=constants.LEFT_ARROW + 'Back', callback_data=str(BACK)),
+back_cancel_button = [InlineKeyboardButton(text=constants.LEFT_ARROW + ' Back', callback_data=str(BACK)),
                       InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]
 
 # Enable logging
