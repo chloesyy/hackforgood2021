@@ -304,8 +304,11 @@ def organisation_detail(update, context):
     """
     query = update.callback_query
     
+    if CURRENT["state"] != VOLUNTEERS:
+        # back button not pressed
+        CURRENT["organisation"] = query.data
+
     CURRENT["state"] = ORG_DEETS
-    CURRENT["organisation"] = query.data
     logger.info("User clicked on {}".format(CURRENT["organisation"]))
 
     organisation_deets = {}
