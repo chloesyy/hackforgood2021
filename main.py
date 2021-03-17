@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS = range(7)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS, VOLUNTEERS = range(7)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
@@ -297,7 +297,12 @@ def organisation_detail(update, context):
 
     button_list = []
     for detail in constants.ORGANISATION_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
-        button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
+        if detail == "Go to Website":
+            for key in DATA["organisations"]:
+                if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
+                    button_list.append([InlineKeyboardButton(text=detail, url=DATA["organisations"][key]["Link"])])
+        else:
+            button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
     button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
@@ -305,6 +310,8 @@ def organisation_detail(update, context):
                              chat_id=query.message.chat_id,
                              reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
+    
+    return VOLUNTEERS
 
 def back(update, context):
     new_state = None
