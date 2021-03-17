@@ -176,6 +176,7 @@ def reply_question(update, context):
                              chat_id=CURRENT["user"],
                              parse_mode=ParseMode.HTML)  
 
+# STATE: SHOWING ASK QUESTIONS/VIEW CATEGORIES
 def categories(update, context):
     """
     Allow user to choose amongst various volunteering categories.
@@ -200,16 +201,18 @@ def categories(update, context):
     
     return CATEGORIES
 
+# STATE: DISPLAY ALL CATEGORIES/COMMUNITIES
 def show_category(update, context):
     """
     Show the chosen category
     """
     query = update.callback_query
-    CURRENT["state"] = CATEGORIES #Run this function with the current state = CATEGORIES
-    
-    if CURRENT["state"] != DETAILS:
+
+    if CURRENT["state"] != DETAILS: # If didn't press back button (natural flow)
         logger.info("User clicked on category {}".format(query.data))
         CURRENT["category"] = query.data
+    
+    CURRENT["state"] = CATEGORIES # Run this function with the current state = CATEGORIES
 
     button_list = []
     for detail in constants.CATEGORY_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
@@ -231,16 +234,19 @@ def show_category(update, context):
     
     return DETAILS
 
+# STATE: VIEWING CATEGORY/COMMUNITY DETAILS
 def category_detail(update, context):
     """
     Show the information requested by user
     """
     query = update.callback_query
     new_state = None
-
+    
     # Define temp store
+    if CURRENT["state"] != ORG_DEETS:
+        # Back button not pressed
+        CURRENT["detail"] = query.data
     CURRENT["state"] = DETAILS
-    CURRENT["detail"] = query.data
 
     logger.info("User clicked on {}".format(CURRENT["detail"]))
     # Dos and Donts
@@ -291,6 +297,7 @@ def category_detail(update, context):
     
     return new_state
 
+# STATE: VIEWING ORGANISATION DETAILS
 def organisation_detail(update, context):
     """
     Shows users the details of the organisation.
@@ -347,8 +354,11 @@ def volunteers(update, context):
                              reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
 
-def back(update, context):
-    new_state = None
+###----------------------------------------- BACK / CANCEL BUTTONS -----------------------------------------###
+
+# BACK BUTTON
+def back(update, context): 
+    new_state = None # No new state
     if CURRENT["state"] == QUESTION or CURRENT["state"] == CHOICE:
         # Show choice menu
         logger.info("Going back to START")
@@ -361,9 +371,19 @@ def back(update, context):
         # Show category details
         logger.info("Going back to CATEGORIES")
         new_state = show_category(update, context)
+    elif CURRENT["state"] == ORG_DEETS:
+        # Show details
+        logger.info("Going back to DETAILS")
+        new_state = category_detail(update,context)
+    elif CURRENT["state"] == VOLUNTEERS:
+        # Show organisation details
+        logger.info("Going back to ORG_DEETS")
+        new_state = organisation_detail(update,context)
 
+    # Must return the previous state
     return new_state
 
+# CANCEL BUTTON
 def cancel(update, context):
     """
     User cancelation function. Cancel conversation by user.
@@ -386,9 +406,13 @@ def cancel(update, context):
 
     return ConversationHandler.END
 
+# ERROR WARNING
 def error(update, context):
     # Log errors caused by updates
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
+###----------------------------------------- MAIN() -----------------------------------------###
 
 def main():
     updater = Updater(constants.API_KEY)
@@ -452,6 +476,9 @@ def main():
     
     updater.idle()
     
+###----------------------------------------- CONNECTING TO DATABASE -----------------------------------------###
+
+# LOAD .JSON FILES WITH TEXT DETAILS
 def load_files():
     logger.info('Loading json files from Data...')
     categories = os.listdir(constants.CATEGORIES_FOLDER)
@@ -477,7 +504,7 @@ def load_files():
         file = open(os.path.join(constants.ORGANISATIONS_FOLDER, organisation))
         DATA["organisations"][file_name] = json.load(file)
         DATA["list_organisations"].append(DATA["organisations"][file_name]["Organisation"])
-            
+
 def connect_PSQL():
     try:
         logger.info("Connecting to PSQL...")
@@ -489,7 +516,8 @@ def connect_PSQL():
         logger.info("Connected to PSQL.")
     except (Exception, psycopg2.DatabaseError) as error:
         logger.warning(error)
-        
+
+# CLOSE CONNECTION TO HEROKU        
 def close_PSQL():
     try:
         if conn is not None:
@@ -497,6 +525,8 @@ def close_PSQL():
             logger.info("Database connection closed.")
     except (Exception, psycopg2.DatabaseError) as error:
         logger.warning(error)
+
+###----------------------------------------- END -----------------------------------------###
 
 if __name__ == '__main__':
     load_files()
