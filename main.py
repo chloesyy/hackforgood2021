@@ -16,7 +16,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryH
 START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS= range(7)
 
 # Callback data
-CATEGORY, QUESTIONS, CANCEL, BACK, CLICK_CAT = range(4)
+CATEGORY, QUESTIONS, CANCEL, BACK, CLICK_CAT = range(5)
 
 # TEMP STORE
 DATA = {}
