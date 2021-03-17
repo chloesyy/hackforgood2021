@@ -239,6 +239,7 @@ def category_detail(update, context):
     if CURRENT["detail"]=="Dos_n_Donts":
         do = []
         dont = []
+        button_list=[]
         for key in DATA["categories"]:
             if DATA["categories"][key]["Community"]==CURRENT["category"]: #If the current category is the same as the 
                 do=DATA["categories"][key]["Dos_n_Donts"][0]
