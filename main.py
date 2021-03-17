@@ -98,8 +98,6 @@ def ask_question_intro(update, context):
                    [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
     keyboard = InlineKeyboardMarkup(button_list)
     
-    context.bot.answer_callback_query(query.id, text=query.data)
-    
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
                              chat_id=query.message.chat_id,
                              reply_markup=keyboard,
@@ -186,7 +184,6 @@ def categories(update, context):
     CURRENT["state"] = CHOICE
 
     query = update.callback_query
-    context.bot.answer_callback_query(query.id, text=query.data)
     
     button_list = []
 
@@ -350,7 +347,6 @@ def cancel(update, context):
     User cancelation function. Cancel conversation by user.
     """
     query = update.callback_query
-    context.bot.answer_callback_query(query.id, text=query.data)
 
     user = query.from_user
     logger.info("User {} canceled the conversation.".format(user.first_name))
