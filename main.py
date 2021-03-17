@@ -347,8 +347,12 @@ def cancel(update, context):
     User cancelation function. Cancel conversation by user.
     """
     query = update.callback_query
+    if query is None:
+        query = update
+        user = update.message.from_user
+    else:
+        user = query.from_user
 
-    user = query.from_user
     logger.info("User {} canceled the conversation.".format(user.first_name))
     
     context.bot.send_message(text=constants.CANCEL_MESSAGE,
@@ -384,7 +388,6 @@ def main():
 
     org_deets_handler = []
     for org in DATA["list_organisations"]:
-        logger.info(org)
         org_deets_handler.append(CallbackQueryHandler(organisation_detail, pattern='^' + org + '$'))
     org_deets_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     org_deets_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
@@ -449,8 +452,6 @@ def load_files():
         file = open(os.path.join(constants.ORGANISATIONS_FOLDER, organisation))
         DATA["organisations"][file_name] = json.load(file)
         DATA["list_organisations"].append(DATA["organisations"][file_name]["Organisation"])
-
-    logger.info(DATA["list_organisations"])
             
 def connect_PSQL():
     try:
