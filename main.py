@@ -282,10 +282,14 @@ def category_detail(update, context):
                                  chat_id=query.message.chat_id,
                                  parse_mode=ParseMode.HTML)  
 
-def organisation_detail(update,context):
-    CURRENT["state"]= ORG_DEETS     
+def organisation_detail(update, context):
+    """
+    Shows users the details of the organisation.
+    """
+    CURRENT["state"] = ORG_DEETS     
     query = update.callback_query
-    logger.info("User clicked on{}".format(query.data))
+    logger.info("User clicked on {}".format(query.data))
+
     button_list = []
     for detail in constants.ORGANISATION_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
         button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
@@ -421,6 +425,8 @@ def load_files():
         file = open(os.path.join(constants.ORGANISATIONS_FOLDER, organisation))
         DATA["organisations"][file_name] = json.load(file)
         DATA["list_organisations"].append(DATA["organisations"][file_name]["Organisation"])
+
+    logger.info(DATA["list_organisations"])
             
 def connect_PSQL():
     try:
