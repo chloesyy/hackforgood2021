@@ -32,3 +32,5 @@ QUESTION_RECEIVED_MESSAGE = 'Question sent. The organisations will get back to y
 REPLY_RECEIVED_MESSAGE = 'Reply sent to user.'
 INVALID_REPLY = 'This is an invalid message to reply to!'
 CATEGORIES_MESSAGE = 'Please click on the category that you would like to learn about below.'
+ORGANISATION_MESSAGE = 'Please click on the organization that you would like to learn more about below.'
+ORGANISATION_DETAIL_MESSAGE = "Please click on what you would like to learn about."
