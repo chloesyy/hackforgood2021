@@ -21,3 +21,6 @@ def get_dos_n_donts(dos, donts):
         DONT += constants.BULLET_POINT + " " + dont + "\n"
 
     return "<b>Do's:</b> \n" + DO + "\n" +"<b>Dont's</b>: \n"+ DONT
+
+def get_org_deets(org_deets):
+    return "<b>Organisation: </b>" + org_deets["Organisation"] + "\n\n<b>About: </b>" + org_deets["About_Organisation"]

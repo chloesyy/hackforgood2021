@@ -295,18 +295,24 @@ def organisation_detail(update, context):
     CURRENT["organisation"] = query.data
     logger.info("User clicked on {}".format(CURRENT["organisation"]))
 
+    organisation_deets = {}
+    # Get details of organisation
+    for key in DATA["organisations"]:
+        if DATA["organisations"][key]["Organisation"] == CURRENT["orgnisation"]:
+            organisation_deets = DATA["organisations"][key]
+
+    response = responses.get_org_deets(organisation_deets)
+
     button_list = []
     for detail in constants.ORGANISATION_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
         if detail == "Go to Website":
-            for key in DATA["organisations"]:
-                if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
-                    button_list.append([InlineKeyboardButton(text=detail, url=DATA["organisations"][key]["Link"])])
+            button_list.append([InlineKeyboardButton(text=detail, url=organisation_deets["Link"])])
         else:
             button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
     button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
-    context.bot.send_message(text=constants.ORGANISATION_DETAIL_MESSAGE,
+    context.bot.send_message(text=response,
                              chat_id=query.message.chat_id,
                              reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
