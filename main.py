@@ -249,8 +249,12 @@ def category_detail(update, context):
             DO = DO + constants.BULLET_POINT +" "+ dos + "\n"
         for donts in dont:
             DONT=DONT + constants.BULLET_POINT +" "+ donts + "\n"
+        button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+        button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+        keyboard = InlineKeyboardMarkup(button_list)
         context.bot.send_message(text="Do: \n" + DO + "\n" +"Don't: \n"+ DONT,
                                  chat_id=query.message.chat_id,
+                                 reply_markup=keyboard,
                                  parse_mode=ParseMode.HTML)
 
     elif CURRENT["detail"]=="Organisations":
@@ -259,6 +263,8 @@ def category_detail(update, context):
             if DATA["categories"][key]["Community"]==CURRENT["category"]:
                 for o in DATA["categories"][key]["Organisations"]:
                     button_list.append([InlineKeyboardButton(text=o, callback_data=o)]) #Creating the button for the organization
+        button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
+        button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
         keyboard = InlineKeyboardMarkup(button_list)        
         context.bot.send_message(text=constants.ORGANISATION_MESSAGE,
                                  chat_id=query.message.chat_id,
