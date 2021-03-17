@@ -24,3 +24,10 @@ def get_dos_n_donts(dos, donts):
 
 def get_org_deets(org_deets):
     return "<b>Organisation: </b>" + org_deets["Organisation"] + "\n\n<b>About Organisation: </b>\n" + org_deets["About_Organisation"]
+
+def get_volunteer_info(volunteer_info):
+    toreturn = ""
+    for v in volunteer_info:
+        toreturn += constants.BULLET_POINT + " " + v + "\n"
+
+    return "<b>Volunteering Roles:</b> \n" + toreturn

@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS, VOLUNTEERS = range(8)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS, VOLUNTEERS, END = range(9)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
@@ -343,16 +343,18 @@ def volunteers(update, context):
     CURRENT["org_deet"] = query.data
     logger.info("User clicked on {}".format(CURRENT["org_deet"]))
 
-    volunteer_info = ""
     button_list=[]
     for key in DATA["organisations"]:
         if DATA["organisations"][key]["Organisation"] == CURRENT["organisation"]:
-            for v in DATA["organisations"][key]["Volunteering_Roles"]:
-                volunteer_info += constants.BULLET_POINT + " " + v + "\n"
+            volunteer_info = DATA["organisations"][key]["Volunteering_Roles"]
+    
+    response = responses.get_volunteer_info(volunteer_info)
+
     button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
     button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
     keyboard = InlineKeyboardMarkup(button_list)
-    context.bot.send_message(text="<b>Volunteering Roles:</b> \n" + volunteer_info,
+
+    context.bot.send_message(text=response,
                              chat_id=query.message.chat_id,
                              reply_markup=keyboard,
                              parse_mode=ParseMode.HTML)
@@ -457,8 +459,8 @@ def main():
             DETAILS: details_handler,
             ORG_DEETS: org_deets_handler,
             VOLUNTEERS: [CallbackQueryHandler(volunteers, pattern='^' + constants.ORGANISATION_DETAILS[0] + '$'), 
-                            CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
-                            CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
+                         CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'), 
+                         CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 
