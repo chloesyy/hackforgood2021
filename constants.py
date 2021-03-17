@@ -24,7 +24,7 @@ BULLET_POINT = '&#8226'
 LEFT_ARROW = '\u00AB'
 
 # Messages
-START_MESSAGE = 'Hello! Welcome to the Volunteer Guidebot! Here, you can ask questions or explore our libraries for information on volunteering at various organisations. \n\n Currently, this bot supports: \n' + BULLET_POINT + ' Sending questions to the adminstrators'
+START_MESSAGE = 'Hello! Welcome to the Volunteer Guidebot! Here, you can ask questions or explore our libraries for information on volunteering at various organisations.'
 START_MESSAGE_ORG = 'Hello! In this chat you can reply to questions sent. Just reply to the message when I send you a question!'
 CANCEL_MESSAGE = 'Goodbye! Hope you\'ve learnt more about volunteering :) \n\nSend /start if you would like to start another conversation.'
 HELP_MESSAGE = 'Who are we? \n\nThis Volunteer Guidebot is a personalized one-stop handbook chatbot that allows you to discover, learn, and enquire about volunteering with various communities in Singapore. \n\nHere is a list of commands that you can do: \n\n /start: Start browsing! \n /help: Use this to get help. \n /cancel: Quit the bot. See you again!'
