@@ -38,6 +38,15 @@ def start(update, context):
     Send a message when the command /start is issued.
     """
     if CURRENT["state"] is not None:
+        # To guard against users who send /start multiple times without cancelling conversation
+        if update.callback_query is None:
+            CURRENT["state"] = None
+            context.bot.send_message(text=constants.ERROR_MESSAGE,
+                                     chat_id=update.message.chat.id, 
+                                     parse_mode=ParseMode.HTML)
+            
+            return ConversationHandler.END
+
         user = update.callback_query.message.chat
         chat_id = user
     else:
