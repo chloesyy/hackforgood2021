@@ -230,6 +230,7 @@ def category_detail(update, context):
     Show the information requested by user
     """
     query = update.callback_query
+    new_state = None
     
     # Define temp store
     CURRENT["state"] = DETAILS
@@ -275,19 +276,20 @@ def category_detail(update, context):
                                  chat_id=query.message.chat_id,
                                  reply_markup=keyboard,
                                  parse_mode=ParseMode.HTML)
-        return ORG_DEETS
+        new_state = ORG_DEETS
 
     else:
         context.bot.send_message(text="Error!",
                                  chat_id=query.message.chat_id,
                                  parse_mode=ParseMode.HTML)  
+    
+    return new_state
 
 def organisation_detail(update, context):
     """
     Shows users the details of the organisation.
     """
     query = update.callback_query
-    context.bot.answer_callback_query(query.id, text=query.data)
     
     CURRENT["state"] = ORG_DEETS   
     CURRENT["organisation"] = query.data
