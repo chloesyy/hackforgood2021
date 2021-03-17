@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS, VOLUNTEERS, END = range(9)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS, VOLUNTEERS = range(9)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
@@ -26,6 +26,10 @@ CURRENT["state"] = None
 # Define psql connectors
 conn = None
 cur = None
+
+# Back and Cancel Buttons
+back_cancel_button = [InlineKeyboardButton(text='Back', callback_data=str(BACK)),
+                      InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -94,8 +98,8 @@ def ask_question_intro(update, context):
 
     query = update.callback_query
     
-    button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
-                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    button_list = []
+    button_list.append(back_cancel_button)
     keyboard = InlineKeyboardMarkup(button_list)
     
     context.bot.send_message(text=constants.QUESTION_MESSAGE,
@@ -117,8 +121,8 @@ def ask_question(update, context):
     
     response = responses.send_to_group(text)
     
-    button_list = [[InlineKeyboardButton(text='Back', callback_data=str(BACK))],
-                   [InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]]
+    button_list = []
+    button_list.append(back_cancel_button)
     keyboard = InlineKeyboardMarkup(button_list)
     
     # Send whatever is sent to the bot to time to entrepret group
@@ -190,8 +194,7 @@ def categories(update, context):
 
     for category in DATA["list_categories"]: #these are all the categories(Disability) 
         button_list.append([InlineKeyboardButton(text=category, callback_data=category)]) #Creating the buttons to show each category
-    button_list.append([InlineKeyboardButton(text='Back', callback_data=str(BACK))])
-    button_list.append([InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))])
+    button_list.append(back_cancel_button)
     keyboard = InlineKeyboardMarkup(button_list)
     
     context.bot.send_message(text=constants.CATEGORIES_MESSAGE,
@@ -217,8 +220,7 @@ def show_category(update, context):
     button_list = []
     for detail in constants.CATEGORY_DETAILS: #these are all the categories of categories(Disability) i.e. the Dos and Donts
         button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
-    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
-    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    button_list.append(back_cancel_button)
     keyboard = InlineKeyboardMarkup(button_list)
 
     about = ""    
@@ -263,8 +265,7 @@ def category_detail(update, context):
                 
         response = responses.get_dos_n_donts(dos, donts)
         
-        button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
-        button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+        button_list.append(back_cancel_button)
         keyboard = InlineKeyboardMarkup(button_list)
 
         context.bot.send_message(text=response,
@@ -280,8 +281,7 @@ def category_detail(update, context):
                 for o in DATA["categories"][key]["Organisations"]:
                     #Creating the button for the organization
                     button_list.append([InlineKeyboardButton(text=o, callback_data=o)]) 
-        button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
-        button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+        button_list.append(back_cancel_button)
         keyboard = InlineKeyboardMarkup(button_list)        
 
         context.bot.send_message(text=constants.ORGANISATION_MESSAGE,
@@ -325,8 +325,7 @@ def organisation_detail(update, context):
             button_list.append([InlineKeyboardButton(text=detail, url=organisation_deets["Link"])])
         else:
             button_list.append([InlineKeyboardButton(text=detail, callback_data=detail)]) #Creating each button to show each category
-    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
-    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    button_list.append(back_cancel_button)
     keyboard = InlineKeyboardMarkup(button_list)
     context.bot.send_message(text=response,
                              chat_id=query.message.chat_id,
@@ -350,8 +349,7 @@ def volunteers(update, context):
     
     response = responses.get_volunteer_info(volunteer_info)
 
-    button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
-    button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
+    button_list.append(back_cancel_button)
     keyboard = InlineKeyboardMarkup(button_list)
 
     context.bot.send_message(text=response,
