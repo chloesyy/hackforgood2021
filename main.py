@@ -258,17 +258,19 @@ def category_detail(update, context):
                                  chat_id=query.message.chat_id,
                                  reply_markup=keyboard,
                                  parse_mode=ParseMode.HTML)
-                                 
-    # Dos and Donts
+
+    # Organisations
     elif CURRENT["detail"] == constants.CATEGORY_DETAILS[1]:
-        button_list=[]
+        button_list = []
         for key in DATA["categories"]:
-            if DATA["categories"][key]["Community"]==CURRENT["category"]:
+            if DATA["categories"][key]["Community"] == CURRENT["category"]:
                 for o in DATA["categories"][key]["Organisations"]:
-                    button_list.append([InlineKeyboardButton(text=o, callback_data=o)]) #Creating the button for the organization
+                    #Creating the button for the organization
+                    button_list.append([InlineKeyboardButton(text=o, callback_data=o)]) 
         button_list.append([InlineKeyboardButton(text="Back", callback_data=str(BACK))])
         button_list.append([InlineKeyboardButton(text="Cancel", callback_data=str(CANCEL))])
         keyboard = InlineKeyboardMarkup(button_list)        
+
         context.bot.send_message(text=constants.ORGANISATION_MESSAGE,
                                  chat_id=query.message.chat_id,
                                  reply_markup=keyboard,
@@ -279,7 +281,7 @@ def category_detail(update, context):
         context.bot.send_message(text="Error!",
                                  chat_id=query.message.chat_id,
                                  parse_mode=ParseMode.HTML)  
-#NEWWWWW
+
 def organisation_detail(update,context):
     CURRENT["state"]= ORG_DEETS     
     query = update.callback_query
@@ -352,6 +354,12 @@ def main():
         details_handler.append(CallbackQueryHandler(category_detail, pattern='^' + detail + '$'))
     details_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
     details_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+
+    org_deets_handler = []
+    for org in DATA["list_organisations"]:
+        org_deets_handler.append(CallbackQueryHandler(organisation_detail, pattern='^' + org + '$'))
+    org_deets_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
+    org_deets_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
     
     # Add conversation handler with predefined states:
     conv_handler = ConversationHandler(
@@ -367,6 +375,7 @@ def main():
                        CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')],
             CATEGORIES: categories_handler,
             DETAILS: details_handler,
+            ORG_DEETS: org_deets_handler,
             ORGANISATION: [MessageHandler(Filters.text, reply_question)]
         },
 

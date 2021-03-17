@@ -20,4 +20,4 @@ def get_dos_n_donts(dos, donts):
     for dont in donts:
         DONT += constants.BULLET_POINT + " " + dont + "\n"
 
-    return "Do: \n" + DO + "\n" +"Don't: \n"+ DONT
+    return "<b>Do's:</b> \n" + DO + "\n" +"<b>Dont's</b>: \n"+ DONT
