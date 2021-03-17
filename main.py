@@ -28,8 +28,10 @@ conn = None
 cur = None
 
 # Back and Cancel Buttons
-back_cancel_button = [InlineKeyboardButton(text='Back', callback_data=str(BACK)),
+back_cancel_button = [InlineKeyboardButton(text=constants.LEFT_ARROW + 'Back', callback_data=str(BACK)),
                       InlineKeyboardButton(text='Cancel', callback_data=str(CANCEL))]
+back_cancel_handler = [CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'),
+                       CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$')]
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -426,20 +428,17 @@ def main():
     categories_handler = []
     for category in DATA["list_categories"]:
         categories_handler.append(CallbackQueryHandler(show_category, pattern='^' + category + '$'))
-    categories_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
-    categories_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+    categories_handler.extend(back_cancel_handler)
 
     details_handler = []
     for detail in constants.CATEGORY_DETAILS:
         details_handler.append(CallbackQueryHandler(category_detail, pattern='^' + detail + '$'))
-    details_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
-    details_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+    details_handler.extend(back_cancel_handler)
 
     org_deets_handler = []
     for org in DATA["list_organisations"]:
         org_deets_handler.append(CallbackQueryHandler(organisation_detail, pattern='^' + org + '$'))
-    org_deets_handler.append(CallbackQueryHandler(back, pattern='^' + str(BACK) + '$'))
-    org_deets_handler.append(CallbackQueryHandler(cancel, pattern='^' + str(CANCEL) + '$'))
+    org_deets_handler.extend(back_cancel_handler)
     
     # Add conversation handler with predefined states:
     conv_handler = ConversationHandler(
