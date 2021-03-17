@@ -13,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 
 # Set states
-START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS= range(7)
+START, CHOICE, ORGANISATION, QUESTION, CATEGORIES, DETAILS, ORG_DEETS = range(7)
 
 # Callback data
 CATEGORY, QUESTIONS, CANCEL, BACK = range(4)
@@ -231,7 +231,7 @@ def category_detail(update, context):
     """
     query = update.callback_query
     new_state = None
-    
+
     # Define temp store
     CURRENT["state"] = DETAILS
     CURRENT["detail"] = query.data
@@ -277,6 +277,7 @@ def category_detail(update, context):
                                  reply_markup=keyboard,
                                  parse_mode=ParseMode.HTML)
         new_state = ORG_DEETS
+        print("Hello")
 
     else:
         context.bot.send_message(text="Error!",
@@ -291,7 +292,7 @@ def organisation_detail(update, context):
     """
     query = update.callback_query
     
-    CURRENT["state"] = ORG_DEETS   
+    CURRENT["state"] = ORG_DEETS
     CURRENT["organisation"] = query.data
     logger.info("User clicked on {}".format(CURRENT["organisation"]))
 
