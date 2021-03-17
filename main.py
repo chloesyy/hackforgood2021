@@ -235,10 +235,6 @@ def category_detail(update, context):
     """
     query = update.callback_query
     new_state = None
-
-    if CURRENT["state"] != ORG_DEETS: # If didn't press back button (natural flow)
-        logger.info("User clicked on detail {}".format(query.data))
-        CURRENT["category"] = query.data
     
     CURRENT["state"] = DETAILS # Run this function with the current state = CATEGORIES
 
